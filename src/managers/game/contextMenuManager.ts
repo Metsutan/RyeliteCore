@@ -210,6 +210,7 @@ export class ContextMenuManager {
                                 ActionState.Any
                             ),
                             r,
+                            // @ts-ignore
                             actionInformation.actionNumber,
                             i,
                             n,
@@ -236,6 +237,7 @@ export class ContextMenuManager {
                                 document.highlite.gameHooks.EntityManager.Instance._mainPlayer._currentState.getCurrentState()
                             ),
                             r,
+                            // @ts-ignore
                             actionInformation.actionNumber,
                             i,
                             n,
@@ -263,6 +265,7 @@ export class ContextMenuManager {
                                 ActionState.Any
                             ),
                             r,
+                            // @ts-ignore
                             actionInformation.actionNumber,
                             i,
                             n,
@@ -289,6 +292,7 @@ export class ContextMenuManager {
                                 document.highlite.gameHooks.EntityManager.Instance._mainPlayer._currentState.getCurrentState()
                             ),
                             r,
+                            // @ts-ignore
                             actionInformation.actionNumber,
                             i,
                             n,
@@ -327,9 +331,12 @@ export class ContextMenuManager {
         const uniqueEntities = [];
         for (const actionInformation of Object.entries(actionsAndEntities)) {
             if (
+                // @ts-ignore
                 actionInformation[1]._entity != null &&
+                // @ts-ignore
                 !uniqueEntities.includes(actionInformation[1]._entity)
             ) {
+                // @ts-ignore
                 uniqueEntities.push(actionInformation[1]._entity);
             }
         }
@@ -338,6 +345,7 @@ export class ContextMenuManager {
         // Now we 'create' actions as needed
         for (const entity of uniqueEntities) {
             const contextMenuActionsSpecific =
+            // @ts-ignore
                 this.gameWorldActions[entity._entityType];
             if (contextMenuActionsSpecific) {
                 for (const [actionName, actionInfo] of Object.entries(
@@ -346,9 +354,11 @@ export class ContextMenuManager {
                     // TODO: Figure out if we ever need these nulls
                     outputs.push(
                         vG._contextMenuItemFactory.createGameWorldContextMenuItem(
+                            // @ts-ignore
                             actionInfo.actionNumber,
                             this.worldObjectActionHandler.bind(
                                 this,
+                                // @ts-ignore
                                 entity._entityType
                             ),
                             entity,
@@ -369,6 +379,7 @@ export class ContextMenuManager {
                     // TODO: Figure out if we ever need these nulls
                     outputs.push(
                         vG._contextMenuItemFactory.createGameWorldContextMenuItem(
+                            // @ts-ignore
                             actionInfo.actionNumber,
                             this.worldObjectActionHandler.bind(
                                 this,
@@ -400,7 +411,9 @@ export class ContextMenuManager {
             for (const [actionName, actionInformation] of Object.entries(
                 inventoryActions
             )) {
+                // @ts-ignore
                 if (actionInformation.actionNumber == actionNumber) {
+                    // @ts-ignore
                     for (const handleFunction of actionInformation.handleFunctions) {
                         handleFunction(e, i);
                     }
@@ -416,7 +429,9 @@ export class ContextMenuManager {
             for (const [actionName, actionInformation] of Object.entries(
                 entityActions
             )) {
+                // @ts-ignore
                 if (actionInformation.actionNumber == e.Action) {
+                    // @ts-ignore
                     for (const handleFunction of actionInformation.handleFunctions) {
                         handleFunction(e, i);
                     }

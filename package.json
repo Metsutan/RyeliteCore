@@ -1,0 +1,48 @@
+{
+  "name": "@highlite/plugin-api",
+  "version": "1.0.1",
+  "description": "Plugin API for the High Spell Highlite Client",
+  "main": "dist/index.d.ts",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/**/*.d.ts",
+    "dist/**/*.d.ts.map",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "yarn build"
+  },
+  "keywords": [
+    "highlite",
+    "plugin",
+    "typescript",
+    "types",
+    "definitions",
+    "framework"
+  ],
+  "author": "Highl1te",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Highl1te/Core.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Highl1te/Core/issues"
+  },
+  "homepage": "https://github.com/Highl1te/Core#readme",
+  "packageManager": "yarn@4.9.1",
+  "dependencies": {
+    "idb": "^8.0.3"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
