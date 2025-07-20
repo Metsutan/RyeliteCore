@@ -3,6 +3,9 @@
 // Core modules
 export * from './globals';
 
+// Core interface
+export * from './core';
+
 // Game interfaces and enums
 export * from './interfaces/game/ActionStates.enum';
 export * from './interfaces/game/Appearance.class';
@@ -37,6 +40,12 @@ export * from './managers/highlite/settingsManager';
 export * from './managers/highlite/soundsManager';
 export * from './managers/highlite/uiManager';
 
+// Reflector
+export * from './reflector/reflector';
+export * from './reflector/signatures';
+export * from './reflector/types';
+
 // Utilities
 export * from './utilities/abbreviateValue';
 export * from './utilities/lookupUtils';
+export * from './utilities/resources';
