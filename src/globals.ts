@@ -1,4 +1,3 @@
-import type { IHighlite } from './interfaces/highlite/core.interface';
 import type { Plugin } from './interfaces/highlite/plugin/plugin.class';
 declare global {
     interface Window {
@@ -17,7 +16,6 @@ declare global {
                 [key: string]: any;
             };
             plugins: Array<Plugin>;
-            core: IHighlite;
         };
 
         client: {

@@ -9,6 +9,19 @@ export enum EntityType {
     Player = 3,
 }
 
+interface ActionInformation {
+    actionNumber: number;
+    handleFunctions: Function[];
+}
+
+interface EntityAction {
+    _entity: any;
+}
+
+interface GameEntity {
+    _entityType: any;
+}
+
 export class ContextMenuManager {
     private static instance: ContextMenuManager;
     defaultActions = {};
@@ -202,6 +215,7 @@ export class ContextMenuManager {
                 for (const [actionName, actionInformation] of Object.entries(
                     contextMenuActionsContextSpecific
                 )) {
+                    const actionInfo = actionInformation as ActionInformation;
                     output.push(
                         aG._contextMenuItemFactory.createInventoryItemContextMenuItem(
                             this.inventoryActionHandler.bind(
@@ -210,7 +224,7 @@ export class ContextMenuManager {
                                 ActionState.Any
                             ),
                             r,
-                            actionInformation.actionNumber,
+                            actionInfo.actionNumber,
                             i,
                             n,
                             null,
@@ -228,6 +242,7 @@ export class ContextMenuManager {
                 for (const [actionName, actionInformation] of Object.entries(
                     contextMenuActionsContextSpecificActionSpecific
                 )) {
+                    const actionInfo = actionInformation as ActionInformation;
                     output.push(
                         aG._contextMenuItemFactory.createInventoryItemContextMenuItem(
                             this.inventoryActionHandler.bind(
@@ -236,7 +251,7 @@ export class ContextMenuManager {
                                 document.highlite.gameHooks.EntityManager.Instance._mainPlayer._currentState.getCurrentState()
                             ),
                             r,
-                            actionInformation.actionNumber,
+                            actionInfo.actionNumber,
                             i,
                             n,
                             null,
@@ -255,6 +270,7 @@ export class ContextMenuManager {
                 for (const [actionName, actionInformation] of Object.entries(
                     contextMenuActions
                 )) {
+                    const actionInfo = actionInformation as ActionInformation;
                     output.push(
                         aG._contextMenuItemFactory.createInventoryItemContextMenuItem(
                             this.inventoryActionHandler.bind(
@@ -263,7 +279,7 @@ export class ContextMenuManager {
                                 ActionState.Any
                             ),
                             r,
-                            actionInformation.actionNumber,
+                            actionInfo.actionNumber,
                             i,
                             n,
                             null,
@@ -281,6 +297,7 @@ export class ContextMenuManager {
                 for (const [actionName, actionInformation] of Object.entries(
                     contextMenuActionsActionSpecific
                 )) {
+                    const actionInfo = actionInformation as ActionInformation;
                     output.push(
                         aG._contextMenuItemFactory.createInventoryItemContextMenuItem(
                             this.inventoryActionHandler.bind(
@@ -289,7 +306,7 @@ export class ContextMenuManager {
                                 document.highlite.gameHooks.EntityManager.Instance._mainPlayer._currentState.getCurrentState()
                             ),
                             r,
-                            actionInformation.actionNumber,
+                            actionInfo.actionNumber,
                             i,
                             n,
                             null,
@@ -324,13 +341,14 @@ export class ContextMenuManager {
         const actionsAndEntities = cG._actionsAndEntities;
 
         // Find 'unique' enities (where actionsAndEntities._entity is unique)
-        const uniqueEntities = [];
+        const uniqueEntities: GameEntity[] = [];
         for (const actionInformation of Object.entries(actionsAndEntities)) {
+            const entityAction = actionInformation[1] as EntityAction;
             if (
-                actionInformation[1]._entity != null &&
-                !uniqueEntities.includes(actionInformation[1]._entity)
+                entityAction._entity != null &&
+                !uniqueEntities.includes(entityAction._entity)
             ) {
-                uniqueEntities.push(actionInformation[1]._entity);
+                uniqueEntities.push(entityAction._entity);
             }
         }
 
@@ -343,10 +361,11 @@ export class ContextMenuManager {
                 for (const [actionName, actionInfo] of Object.entries(
                     contextMenuActionsSpecific
                 )) {
+                    const actionData = actionInfo as ActionInformation;
                     // TODO: Figure out if we ever need these nulls
                     outputs.push(
                         vG._contextMenuItemFactory.createGameWorldContextMenuItem(
-                            actionInfo.actionNumber,
+                            actionData.actionNumber,
                             this.worldObjectActionHandler.bind(
                                 this,
                                 entity._entityType
@@ -366,10 +385,11 @@ export class ContextMenuManager {
                 for (const [actionName, actionInfo] of Object.entries(
                     contextMenuActionsAny
                 )) {
+                    const actionData = actionInfo as ActionInformation;
                     // TODO: Figure out if we ever need these nulls
                     outputs.push(
                         vG._contextMenuItemFactory.createGameWorldContextMenuItem(
-                            actionInfo.actionNumber,
+                            actionData.actionNumber,
                             this.worldObjectActionHandler.bind(
                                 this,
                                 EntityType.Any
@@ -400,8 +420,9 @@ export class ContextMenuManager {
             for (const [actionName, actionInformation] of Object.entries(
                 inventoryActions
             )) {
-                if (actionInformation.actionNumber == actionNumber) {
-                    for (const handleFunction of actionInformation.handleFunctions) {
+                const actionInfo = actionInformation as ActionInformation;
+                if (actionInfo.actionNumber == actionNumber) {
+                    for (const handleFunction of actionInfo.handleFunctions) {
                         handleFunction(e, i);
                     }
                 }
@@ -416,8 +437,9 @@ export class ContextMenuManager {
             for (const [actionName, actionInformation] of Object.entries(
                 entityActions
             )) {
-                if (actionInformation.actionNumber == e.Action) {
-                    for (const handleFunction of actionInformation.handleFunctions) {
+                const actionInfo = actionInformation as ActionInformation;
+                if (actionInfo.actionNumber == e.Action) {
+                    for (const handleFunction of actionInfo.handleFunctions) {
                         handleFunction(e, i);
                     }
                 }

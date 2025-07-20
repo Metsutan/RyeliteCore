@@ -19,12 +19,13 @@ export interface ClassInfo {
 export interface ClassSignature {
     fields?: string[];
     methods?: string[];
+    contains?: string;
 }
 
 //  Search criteria for mapping an enum
 export interface EnumInfo {
     name: string,
-    members: [string],
+    members: string[],
     start:  number,
     end: number
 }

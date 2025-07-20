@@ -2,7 +2,7 @@ import { parse, Node } from 'acorn';
 import * as walk from 'acorn-walk';
 import { HighliteResources } from '../utilities/resources';
 import { HookManager } from '../managers/highlite/hookManager';
-import { ClassInfo, EnumInfo, ClassSignature, EnumSignature, HookMap, HookEntries } from './signatures';
+import { ClassInfo, EnumInfo, ClassSignature, EnumSignature, HookMap, HookEntries } from './types';
 import { ClassSignatures, EnumSignatures } from './signatures';
 
 // Define the hook reflector for mapping classes and statements
@@ -71,7 +71,7 @@ export class Reflector {
         }
 
         // Read from the client enum hooks
-        const clientEnumHooks = await highliteResources.getItem<HookEnties>('clientEnumHooks');
+        const clientEnumHooks = await highliteResources.getItem<HookEntries>('clientEnumHooks');
 
         // If we have stored enum hooks
         if (Array.isArray(clientEnumHooks)) {
@@ -299,7 +299,7 @@ export class Reflector {
             if (!signature.includes.every(m => e.members.includes(m))) return false;
 
             // Return false if we have any of the excluded fileds
-            if (signature.exclude && signature.exclude.some(x => e.members.includes(x))) return false;
+            if (signature.excludes && signature.excludes.some(x => e.members.includes(x))) return false;
 
             // Return true if all checks pass
             return true;
@@ -320,24 +320,24 @@ export class Reflector {
     static bindClassHooks(hookManager: HookManager) {
 
         // Iterate through all the class hooks
-        Array.from(Reflector.classHooks.entries()).forEach(([name, hook] : [string, string]) => {
+        for (const [name, hook] of Reflector.classHooks.entries()) {
 
             console.log(name, hook)
 
             // Register the class hook on the manager
             hookManager.registerClass(hook, name)
-        });
+        }
     }
 
     // Bind the enum hooks to the hook manager
     static bindEnumHooks(hookManager: HookManager) {
 
         // Iterate through all the enum hooks
-        Array.from(Reflector.enumHooks.entries()).forEach(([name, hook] : [string, string]) => {
+        for (const [name, hook] of Reflector.enumHooks.entries()) {
 
             // Register the class hook on the manager
             hookManager.registerEnum(hook, name)
-        });
+        }
     }
 
     // Convert a HookMap to its serializable tuple form

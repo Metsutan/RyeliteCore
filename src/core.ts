@@ -47,7 +47,18 @@ export class Highlite {
         // Bind the enums to the hook manager (registerEnum)
         // These are the lookup tables
         Reflector.bindEnumHooks(this.hookManager);
+    }
 
+    async loginHooks(fnName: string, ...args: any[]) {
+        if (fnName === 'LoginScreen_handleRegisterButtonClicked') {
+            window.open('https://highspell.com/register', '_blank');
+        }
+        if (fnName === 'LoginScreen_handleHomeButtonClicked') {
+            window.open('https://highspell.com/', '_blank');
+        }
+    }
+
+    async initialize() {
         // Function Hook-ins
         this.hookManager.registerClassOverrideHook(
             'LoginScreen',
@@ -103,15 +114,6 @@ export class Highlite {
             'getActionsAndEntitiesAtMousePointer',
             this.contextMenuManager.ActionSorting
         );
-    }
-
-    async loginHooks(fnName: string, ...args: any[]) {
-        if (fnName === 'LoginScreen_handleRegisterButtonClicked') {
-            window.open('https://highspell.com/register', '_blank');
-        }
-        if (fnName === 'LoginScreen_handleHomeButtonClicked') {
-            window.open('https://highspell.com/', '_blank');
-        }
     }
 
     async start() {
