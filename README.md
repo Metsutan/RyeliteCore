@@ -5,9 +5,9 @@ TypeScript type definitions for the Highlite Core Plugin Development Framework.
 ## Installation
 
 ```bash
-npm install @highlite/core-types
+npm install @highlite/plugin-api
 # or
-yarn add @highlite/core-types
+yarn add @highlite/plugin-api
 ```
 
 ## Usage
@@ -15,7 +15,7 @@ yarn add @highlite/core-types
 This package provides TypeScript type definitions for developing Highlite plugins. Import the types you need:
 
 ```typescript
-import { Plugin, IHighlite, PluginSettings } from '@highlite/core-types';
+import { Plugin, IHighlite, PluginSettings } from '@highlite/plugin-api';
 
 export class MyPlugin extends Plugin {
     pluginName = 'MyAwesomePlugin';
