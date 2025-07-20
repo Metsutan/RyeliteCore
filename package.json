@@ -35,6 +35,8 @@
   "homepage": "https://github.com/Highl1te/Core#readme",
   "packageManager": "yarn@4.9.1",
   "dependencies": {
+    "acorn": "^8.15.0",
+    "acorn-walk": "^8.3.4",
     "idb": "^8.0.3"
   },
   "devDependencies": {
