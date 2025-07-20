@@ -1,12 +1,12 @@
-import { ContextMenuManager } from '../managers/game/contextMenuManager';
-import { HookManager } from '../managers/highlite/hookManager';
-import { NotificationManager } from '../managers/highlite/notificationManager';
-import { PanelManager } from '../managers/highlite/panelManager';
-import { PluginManager } from '../managers/highlite/pluginManger';
-import { UIManager } from '../managers/highlite/uiManager';
-import { SettingsManager } from '../managers/highlite/settingsManager';
-import { DatabaseManager } from '../managers/highlite/databaseManager';
-import { SoundManager } from '../managers/highlite/soundsManager';
+import { ContextMenuManager } from './managers/game/contextMenuManager';
+import { HookManager } from './managers/highlite/hookManager';
+import { NotificationManager } from './managers/highlite/notificationManager';
+import { PanelManager } from './managers/highlite/panelManager';
+import { PluginManager } from './managers/highlite/pluginManger';
+import { UIManager } from './managers/highlite/uiManager';
+import { SettingsManager } from './managers/highlite/settingsManager';
+import { DatabaseManager } from './managers/highlite/databaseManager';
+import { SoundManager } from './managers/highlite/soundsManager';
 
 export class Highlite {
     hookManager: HookManager;

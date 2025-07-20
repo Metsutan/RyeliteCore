@@ -12,7 +12,7 @@
         "rootDir": "./src",
         "declaration": true,
         "declarationMap": true,
-        "emitDeclarationOnly": true,
+        "emitDeclarationOnly": false,
         "noEmit": false,
         
         // Type Checking
@@ -48,10 +48,11 @@
         "emitDecoratorMetadata": true
     },
     "include": [
-        "src/globals.ts",
         "src/interfaces/**/*",
         "src/managers/**/*",
-        "src/utilities/**/*"
+        "src/utilities/**/*",
+        "src/index.ts",
+        "src/globals.ts",
     ],
     "exclude": [
         "node_modules",
