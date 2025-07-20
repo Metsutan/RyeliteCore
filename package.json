@@ -1,6 +1,6 @@
 {
   "name": "@highlite/plugin-api",
-  "version": "1.0.4",
+  "version": "1.0.6",
   "description": "Plugin API for the High Spell Highlite Client",
   "main": "dist/index.d.ts",
   "types": "dist/index.d.ts",

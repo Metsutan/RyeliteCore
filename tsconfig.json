@@ -48,11 +48,7 @@
         "emitDecoratorMetadata": true
     },
     "include": [
-        "src/interfaces/**/*",
-        "src/managers/**/*",
-        "src/utilities/**/*",
-        "src/index.ts",
-        "src/globals.ts",
+        "src/**/*.*"
     ],
     "exclude": [
         "node_modules",
