@@ -53,4 +53,8 @@ export class MyPlugin extends Plugin {
 - `ContextMenuManager` - Context menu handling
 
 ### Utilities
+- `Reflector` - Hooks onto the client and finds classes to be used as hooks
 - Various utility functions for value formatting and lookups
+
+## Game Hooks
+If you are building a plugin please read our guide on [how to make Game Hooks](https://github.com/Highl1te/Core/blob/main/docs/gamehooks.md).
