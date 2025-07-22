@@ -99,14 +99,6 @@ export class Highlite {
             'BankUIManager',
             '_handleCenterMenuWillBeRemoved'
         );
-        this.hookManager.registerClassHook(
-            'SpellMenuManager',
-            '_handleSpellItemPointerOver'
-        );
-        this.hookManager.registerClassHook(
-            'SpellMenuManager',
-            '_handleSpellItemPointerOut'
-        );
 
         // Needs Naming
         this.contextMenuManager.registerContextHook(
