@@ -20,6 +20,32 @@ export class HookManager {
         }
 
         document.highlite.gameHooks[mappedName] = classInstance;
+
+        const classPrototype = classInstance.prototype;
+
+
+        const prototypeMethods = Object.entries(Object.getOwnPropertyDescriptors(classPrototype))
+            .filter(([name, desc]) =>
+                typeof desc.value === 'function' &&
+                name !== 'constructor'
+            )
+            .map(([name]) => name);
+
+        const staticMethods = Object.entries(Object.getOwnPropertyDescriptors(classInstance))
+            .filter(([name, desc]) =>
+                typeof desc.value === 'function' &&
+                !['length', 'name', 'prototype'].includes(name)
+            )
+            .map(([name]) => name);
+
+        for (const fnName in prototypeMethods) {
+            this.registerClassHook(mappedName, prototypeMethods[fnName]);
+        }
+
+        for (const staticMethod in staticMethods) {
+            this.registerStaticClassHook(mappedName, staticMethods[staticMethod])
+        }
+
         return true;
     }
 

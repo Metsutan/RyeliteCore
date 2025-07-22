@@ -62,6 +62,7 @@ export class Highlite {
 
     initialize() {
         console.info("[Highlite] Core Initializing")
+
         // Function Hook-ins
         this.hookManager.registerClassOverrideHook(
             'LoginScreen',
@@ -73,50 +74,51 @@ export class Highlite {
             '_handleHomeButtonClicked',
             this.loginHooks
         );
-        this.hookManager.registerClassHook('GameLoop', '_update');
-        this.hookManager.registerClassHook('GameLoop', '_draw');
-        this.hookManager.registerClassHook(
-            'PrivateChatMessageList',
-            'addChatMessage'
-        );
-        this.hookManager.registerClassHook('SocketManager', '_loggedIn');
-        this.hookManager.registerClassHook('SocketManager', '_handleLoggedOut');
-        this.hookManager.registerClassHook(
-            'SocketManager',
-            '_handleEnteredIdleStateAction'
-        );
-        this.hookManager.registerClassHook(
-            'SocketManager',
-            '_handleTradeRequestedPacket'
-        );
-        this.hookManager.registerClassHook(
-            'SocketManager',
-            '_handleInvokedInventoryItemActionPacket'
-        );
-        this.hookManager.registerClassHook('ScreenMask', 'initializeControls'); // When this fires, game UI is ready
-        this.hookManager.registerClassHook('BankUIManager', 'showBankMenu');
-        this.hookManager.registerClassHook(
-            'BankUIManager',
-            '_handleCenterMenuWillBeRemoved'
-        );
 
-        // Needs Naming
-        this.contextMenuManager.registerContextHook(
-            'ContextMenuManager',
-            '_createInventoryItemContextMenuItems',
-            this.contextMenuManager.inventoryContextHook
-        );
-        this.contextMenuManager.registerContextHook(
-            'ContextMenuManager',
-            '_createGameWorldContextMenuItems',
-            this.contextMenuManager.gameWorldContextHook
-        );
-        this.hookManager.registerStaticClassHook('TargetActionManager', 'handleTargetAction');
-        this.hookManager.registerStaticClassHook(
-            'TargetActionManager',
-            'getActionsAndEntitiesAtMousePointer',
-            this.contextMenuManager.ActionSorting
-        );
+        // this.hookManager.registerClassHook('GameLoop', '_update');
+        // this.hookManager.registerClassHook('GameLoop', '_draw');
+        // this.hookManager.registerClassHook(
+        //     'PrivateChatMessageList',
+        //     'addChatMessage'
+        // );
+        // this.hookManager.registerClassHook('SocketManager', '_loggedIn');
+        // this.hookManager.registerClassHook('SocketManager', '_handleLoggedOut');
+        // this.hookManager.registerClassHook(
+        //     'SocketManager',
+        //     '_handleEnteredIdleStateAction'
+        // );
+        // this.hookManager.registerClassHook(
+        //     'SocketManager',
+        //     '_handleTradeRequestedPacket'
+        // );
+        // this.hookManager.registerClassHook(
+        //     'SocketManager',
+        //     '_handleInvokedInventoryItemActionPacket'
+        // );
+        // this.hookManager.registerClassHook('ScreenMask', 'initializeControls'); // When this fires, game UI is ready
+        // this.hookManager.registerClassHook('BankUIManager', 'showBankMenu');
+        // this.hookManager.registerClassHook(
+        //     'BankUIManager',
+        //     '_handleCenterMenuWillBeRemoved'
+        // );
+        //
+        // // Needs Naming
+        // this.contextMenuManager.registerContextHook(
+        //     'ContextMenuManager',
+        //     '_createInventoryItemContextMenuItems',
+        //     this.contextMenuManager.inventoryContextHook
+        // );
+        // this.contextMenuManager.registerContextHook(
+        //     'ContextMenuManager',
+        //     '_createGameWorldContextMenuItems',
+        //     this.contextMenuManager.gameWorldContextHook
+        // );
+        // this.hookManager.registerStaticClassHook('TargetActionManager', 'handleTargetAction');
+        // this.hookManager.registerStaticClassHook(
+        //     'TargetActionManager',
+        //     'getActionsAndEntitiesAtMousePointer',
+        //     this.contextMenuManager.ActionSorting
+        // );
     }
 
     async start() {

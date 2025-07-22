@@ -11,14 +11,14 @@ export function abbreviateValue(number: number): string {
 
     // Values between 1,000,000 and 999,999,999 are abbreviated with 'M'
     if (number < 1000000000) {
-        return (number / 1000000).toFixed(1) + 'M';
+        return (number / 1000000).toFixed(2) + 'M';
     }
 
     // Values between 1,000,000,000 and 999,999,999,999 are abbreviated with 'B'
     if (number < 1000000000000) {
-        return (number / 1000000000).toFixed(1) + 'B';
+        return (number / 1000000000).toFixed(3) + 'B';
     }
 
     // Values 1 trillion and above are abbreviated with 'T'
-    return (number / 1000000000000).toFixed(1) + 'T';
+    return (number / 1000000000000).toFixed(4) + 'T';
 }
