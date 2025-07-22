@@ -47,6 +47,8 @@ export class Highlite {
         // Bind the enums to the hook manager (registerEnum)
         // These are the lookup tables
         Reflector.bindEnumHooks(this.hookManager);
+
+        this.initialize();
     }
 
     async loginHooks(fnName: string, ...args: any[]) {
@@ -58,7 +60,8 @@ export class Highlite {
         }
     }
 
-    async initialize() {
+    initialize() {
+        console.info("[Highlite] Core Initializing")
         // Function Hook-ins
         this.hookManager.registerClassOverrideHook(
             'LoginScreen',

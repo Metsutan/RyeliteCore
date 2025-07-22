@@ -322,7 +322,7 @@ export class Reflector {
         // Iterate through all the class hooks
         for (const [name, hook] of Reflector.classHooks.entries()) {
 
-            console.log(name, hook)
+            console.debug(name, hook)
 
             // Register the class hook on the manager
             hookManager.registerClass(hook, name)
