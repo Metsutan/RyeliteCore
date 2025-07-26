@@ -22,6 +22,8 @@ export abstract class Plugin {
         },
     };
 
+    data : { [key: string]: any } = {};
+
     onSettingsChanged_enabled() {
         if (this.settings.enable.value) {
             this.start();
@@ -40,11 +42,6 @@ export abstract class Plugin {
         return document.highlite?.gameLookups;
     }
 
-    get registerPlugin() {
-        return document.highlite?.managers?.PluginManager?.registerPlugin?.bind(
-            document.highlite.managers.PluginManager
-        );
-    }
 
     // Log seems to be broken from loading HighSpell Client
     log(...args: any[]): void {

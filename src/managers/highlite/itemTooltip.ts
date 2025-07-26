@@ -29,6 +29,7 @@ export class ItemTooltip {
         this.element = document.createElement('div');
         this.element.className = 'hs-ui-item-tooltip';
         this.element.style.display = 'none';
+
         container.appendChild(this.element);
     }
 

@@ -28,4 +28,10 @@ export interface HighliteSchema extends DBSchema {
             lastUpdated: number;
         };
     };
+    data: {
+        key: string; // User Name
+        value: {
+            [pluginName: string]: any; // Plugin Name -> Data
+        }
+    }
 }

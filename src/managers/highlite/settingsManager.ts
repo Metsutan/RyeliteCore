@@ -10,6 +10,7 @@ export class SettingsManager {
     private database!: IDBPDatabase<HighliteSchema>;
     private pluginList!: Plugin[];
     private username!: string;
+    private databaseSettings!: Record<string, Record<string, boolean | number | string>> | undefined;
 
     private pluginSettings!: { [plugin: string]: HTMLElement };
 
@@ -26,12 +27,13 @@ export class SettingsManager {
         document.highlite.managers.SettingsManager = this;
     }
 
-    init() {
+    async init() {
         this.database = document.highlite.managers.DatabaseManager.database;
         this.pluginList = document.highlite.plugins;
         this.panelManager = document.highlite.managers.PanelManager;
         this.username = document.highlite.gameHooks.EntityManager.Instance._mainPlayer._nameLowerCase;
         this.createMenu();
+        return Promise.resolve();
     }
 
     deinit(): void {
@@ -96,15 +98,13 @@ export class SettingsManager {
     }
 
     async registerPlugins() {
-        // Obtain all plugin settings for a user
-        console.warn(`[Highlite] Loading settings for user: ${this.username}`);
-        let pluginSettings: Record<string, Record<string, boolean | number | string>> | undefined = {};
-        pluginSettings = await this.database.get('settings', this.username);
+        // TODO: This may need to be placed in a more explicit step.
+        this.databaseSettings = await this.database.get('settings', this.username);
 
-        if (pluginSettings) {
+        if (this.databaseSettings) {
             // We have settings for the user, so load them into each plugin
-            for (const plugin in pluginSettings) {
-                const pluginSettingData = pluginSettings[plugin];
+            for (const plugin in this.databaseSettings) {
+                const pluginSettingData = this.databaseSettings[plugin];
                 for (const settingKey in pluginSettingData) {
                     if (pluginSettingData[settingKey] !== undefined) {
                         // Find the plugin in the plugin list
@@ -134,9 +134,11 @@ export class SettingsManager {
             this.makeSettingsReactive(plugin);
             this.createPluginSettings(plugin);
         }
+
+        return Promise.resolve();
     }
 
-    private async storePluginSettings(username: string, plugin: Plugin) {
+    private async storePluginSettings(username: string, plugin: Plugin): Promise<void> {
         let pluginSettings = plugin.settings;
         let pluginName = plugin.pluginName;
         let settingStore: Record<string, Record<string, boolean | number | string>> = {};
@@ -146,7 +148,14 @@ export class SettingsManager {
             settingStore[pluginName][settingKey] = setting.value;
         }
 
-        await this.database.put('settings', settingStore, username);
+        if (!this.databaseSettings) {
+            // If the database settings are not initialized, we need to create it
+            this.databaseSettings = {};
+        }
+
+        this.databaseSettings[pluginName] = settingStore[pluginName];
+
+        await this.database.put('settings', this.databaseSettings!, username);
     }
 
     private createMenu() {
@@ -306,7 +315,7 @@ export class SettingsManager {
         toggleSwitch.addEventListener('change', async () => {
             plugin.settings.enable.value = toggleSwitch.checked;
             plugin.settings.enable.callback.call(plugin);
-            await this.storePluginSettings('kkona', plugin);
+            await this.storePluginSettings(this.username, plugin);
         });
 
         // Cog is the character ⚙️
@@ -545,7 +554,7 @@ export class SettingsManager {
                         // Valid value - apply and save
                         setting.value = newValue;
                         setting.callback.call(plugin);
-                        await this.storePluginSettings('kkona', plugin);
+                        await this.storePluginSettings(this.username, plugin);
                         
                         // Refresh visibility of all settings in case dependencies changed
                         this.refreshPluginSettingsVisibility(plugin);
@@ -555,7 +564,6 @@ export class SettingsManager {
 
                         // Reset styling to normal
                         toggleSwitch.style.accentColor = 'var(--theme-accent)';
-                        console.log(setting);
                     });
 
                     // Add a label for the toggle switch
@@ -657,7 +665,7 @@ export class SettingsManager {
                         // Valid value - apply and save
                         setting.value = newValue;
                         setting.callback.call(plugin);
-                        await this.storePluginSettings('kkona', plugin);
+                        await this.storePluginSettings(this.username, plugin);
                         
                         // Refresh visibility of all settings in case dependencies changed
                         this.refreshPluginSettingsVisibility(plugin);
@@ -666,7 +674,6 @@ export class SettingsManager {
                         numberInput.style.border =
                             '1px solid var(--theme-border)';
                         numberInput.style.boxShadow = 'none';
-                        console.log(setting);
                     });
 
                     // Add a label for the number input
@@ -747,7 +754,7 @@ export class SettingsManager {
                         // Valid value - apply and save
                         setting.value = newValue;
                         setting.callback.call(plugin);
-                        await this.storePluginSettings('kkona', plugin);
+                        await this.storePluginSettings(this.username, plugin);
                         
                         // Refresh visibility of all settings in case dependencies changed
                         this.refreshPluginSettingsVisibility(plugin);
@@ -756,7 +763,6 @@ export class SettingsManager {
                         colorInput.style.border =
                             '1px solid var(--theme-border)';
                         colorInput.style.boxShadow = 'none';
-                        console.log(setting);
                     });
 
                     // Add a label for the color input
@@ -834,7 +840,7 @@ export class SettingsManager {
                         // Valid value - apply and save
                         setting.value = newValue;
                         setting.callback.call(plugin);
-                        await this.storePluginSettings('kkona', plugin);
+                        await this.storePluginSettings(this.username, plugin);
                         
                         // Refresh visibility of all settings in case dependencies changed
                         this.refreshPluginSettingsVisibility(plugin);
@@ -843,7 +849,6 @@ export class SettingsManager {
                         textInput.style.border =
                             '1px solid var(--theme-border)';
                         textInput.style.boxShadow = 'none';
-                        console.log(setting);
                     });
 
                     // Add a label for the text input
@@ -906,7 +911,6 @@ export class SettingsManager {
                         buttonInput.style.border =
                             '1px solid var(--theme-border)';
                         buttonInput.style.boxShadow = 'none';
-                        console.log(setting);
                     });
 
                     buttonInput.addEventListener('mouseenter', () => {
@@ -928,12 +932,12 @@ export class SettingsManager {
                     contentRow.appendChild(buttonContainer);
                     break;
                 default:
-                    console.log(
-                        `Unsupported setting type for ${settingKey}: ${typeof plugin.settings[settingKey]}`
+                    throw new Error(
+                        `[Highlite] Unsupported setting type: ${setting.type} for ${settingKey}`
                     );
             }
 
-            // Handle initial disabled state
+            // Handle initially disabled state
             if (setting.disabled) {
                 const inputs = contentRow.querySelectorAll('input, button');
                 inputs.forEach(input => {

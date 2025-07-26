@@ -122,4 +122,12 @@ export class PanelManager {
         }
         delete this.barContentPages[icon];
     }
+
+    forceClose() {
+        if (this.highliteBarSelectedContent) {
+            this.highliteBarSelectedContent.classList.remove('activated');
+        }
+        this.currentMenuItem = null;
+        window.dispatchEvent(new Event('resize'));
+    }
 }

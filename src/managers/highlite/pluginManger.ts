@@ -53,7 +53,7 @@ export class PluginManager {
 
     startAll(): void {
         for (const plugin of this.plugins) {
-            if (plugin.settings.enable) {
+            if (plugin.settings.enable.value) {
                 try {
                     plugin.start();
                 } catch (error) {
@@ -68,13 +68,15 @@ export class PluginManager {
 
     stopAll(): void {
         for (const plugin of this.plugins) {
-            try {
-                plugin.stop();
-            } catch (error) {
-                console.error(
-                    `[Highlite] Error stopping plugin ${plugin.pluginName}:`,
-                    error
-                );
+            if (plugin.settings.enable.value) {
+                try {
+                    plugin.stop();
+                } catch (error) {
+                    console.error(
+                        `[Highlite] Error stopping plugin ${plugin.pluginName}:`,
+                        error
+                    );
+                }
             }
         }
     }

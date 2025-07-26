@@ -3,6 +3,7 @@ import { HookManager } from './managers/highlite/hookManager';
 import { NotificationManager } from './managers/highlite/notificationManager';
 import { PanelManager } from './managers/highlite/panelManager';
 import { PluginManager } from './managers/highlite/pluginManger';
+import { PluginDataManager } from "./managers/highlite/pluginDataManager";
 import { UIManager } from './managers/highlite/uiManager';
 import { SettingsManager } from './managers/highlite/settingsManager';
 import { DatabaseManager } from './managers/highlite/databaseManager';
@@ -19,6 +20,7 @@ export class Highlite {
     settingsManager: SettingsManager;
     databaseManager: DatabaseManager;
     soundManager: SoundManager;
+    pluginDataManager: PluginDataManager;
 
     constructor() {
         console.info('[Highlite] Core Initializing!');
@@ -39,6 +41,7 @@ export class Highlite {
         this.soundManager = new SoundManager();
         this.settingsManager = new SettingsManager();
         this.databaseManager = new DatabaseManager();
+        this.pluginDataManager = new PluginDataManager();
 
         // Bind the classes from the hook manager (registerClass)
         // Read all the found signature binding 
@@ -65,8 +68,12 @@ export class Highlite {
     // NOTE: This is used to delay plugin-starting until after the login is complete.
     // This is because we want to associate user-settings with the user account.
     async startHook(fnName: string, ...args: any[]) {
-        this.settingsManager.init();
+        await this.settingsManager.init();
         await this.settingsManager.registerPlugins();
+        await this.pluginDataManager.initialize();
+        for (const plugin of this.pluginManager.plugins) {
+            await this.pluginDataManager.addPlugin(plugin);
+        }
         this.pluginManager.initAll();
         this.pluginManager.postInitAll();
         this.pluginManager.startAll();
@@ -74,6 +81,7 @@ export class Highlite {
 
     async stopHook(fnName: string, ...args: any[]) {
         console.warn(`[Highlite] Stopping all plugins due to: ${fnName}`);
+        this.panelManager.forceClose();
         this.settingsManager.deinit();
         this.pluginManager.stopAll();
     }
@@ -85,8 +93,6 @@ export class Highlite {
         this.hookManager.registerClassOverrideHook('LoginScreen', '_handleRegisterButtonClicked', this.loginHooks);
         this.hookManager.registerClassOverrideHook('LoginScreen', '_handleHomeButtonClicked', this.loginHooks);
 
-
-
         // Start Plugins and Settings after Login
         this.hookManager.registerClassHook('SocketManager', '_loggedIn', this.startHook.bind(this));
 
@@ -96,6 +102,12 @@ export class Highlite {
         this.hookManager.registerClassHook('SocketManager', '_handleConnectFailed', this.stopHook.bind(this));
         this.hookManager.registerClassHook('SocketManager', '_handleLoggedOut', this.stopHook.bind(this));
         this.hookManager.registerClassHook('SocketManager', '_loginFailed', this.stopHook.bind(this));
+
+        // TODO: Find a better way to handle manager hook-ins
+        this.contextMenuManager.registerContextHook('ContextMenuItemManager','_createInventoryItemContextMenuItems', this.contextMenuManager.inventoryContextHook);
+        this.contextMenuManager.registerContextHook('ContextMenuItemManager','_createGameWorldContextMenuItems', this.contextMenuManager.gameWorldContextHook);
+        this.hookManager.registerStaticClassHook('TargetActionManager', 'handleTargetAction');
+        this.hookManager.registerStaticClassHook('TargetActionManager','getActionsAndEntitiesAtMousePointer',this.contextMenuManager.ActionSorting);
     }
 
     async start() {

@@ -25,13 +25,13 @@ export class DatabaseManager {
                 ) {
                     db.createObjectStore('drop_logs');
                 }
-                if (
-                    oldVersion < 3 &&
-                    db.objectStoreNames.contains('settings')
-                ) {
-                    // Clear the settings store if it exists
-                    db.deleteObjectStore('settings');
-                    db.createObjectStore('settings');
+                if (oldVersion < 3) {
+                    db.createObjectStore("data");
+                    if (db.objectStoreNames.contains('settings')) {
+                        // Clear the settings store if it exists
+                        db.deleteObjectStore('settings');
+                        db.createObjectStore('settings');
+                    }
                 }
             },
         });

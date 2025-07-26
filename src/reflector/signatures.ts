@@ -35,6 +35,7 @@ export const ClassSignatures: [string, ClassSignature][] = [
     ['HTMLUIManager', { methods: ['getGameContainer'] }],
     ['ScreenMask', { methods: ['getForceDesktopModeControl'] }],
     ['ContextMenuManager', { methods: ['createContextMenu', 'createContextMenuItem'] }],
+    ['ContextMenuItemManager', { methods: ['_createInventoryItemContextMenuItems', '_createGameWorldContextMenuItems'] }],
     ['TargetActionManager', { methods: ['getActionsAndEntitiesAtMousePointer'] }],
     ['MagicSkillManager', { methods: ['canCastSpellAtLevel'] }],
     ['SpellMenuManager', { methods: ['_handleAutoCastChanged', '_handlePendingSpellChanged'] }],
