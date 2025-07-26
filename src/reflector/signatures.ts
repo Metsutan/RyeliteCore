@@ -27,7 +27,7 @@ export const ClassSignatures: [string, ClassSignature][] = [
     ['InventoryItemSpriteManager', { methods: ['getSlot', 'getElement', 'updateAmountText'] }],
     ['SpriteSheetManager', { methods: ['ItemSpritesheetInfo'] }],
     ['GameCameraManager', { methods: ['initializeCamera'] }],
-    ['ItemDefinitionManager', { methods: ['ItemDefMap'] }],
+    ['ItemDefinitionManager', { methods: ['loadFromJSON', 'getDefById'], contains: '_itemDefMap' }],
     ['NpcDefinitionManager', { methods: ['loadFromJSON', 'getDefById'], contains: '_npcDefMap' }],
     ['SpellDefinitionManager', { methods: ['loadFromJSON', 'getDefById'], contains: 'SpellDefs' }],
     ['AppearanceUtils', { methods: ['updateAppearance', 'doesAppearanceAndEquippedItemsMatch'] }],
@@ -39,6 +39,7 @@ export const ClassSignatures: [string, ClassSignature][] = [
     ['TargetActionManager', { methods: ['getActionsAndEntitiesAtMousePointer'] }],
     ['MagicSkillManager', { methods: ['canCastSpellAtLevel'] }],
     ['SpellMenuManager', { methods: ['_handleAutoCastChanged', '_handlePendingSpellChanged'] }],
+    ['QuestDefinitionManager', { methods: ['loadFromJSON', 'getDefById'], contains: 'QuestDefs' }]
 ];
 
 // Define the map of all class hook signatures
@@ -53,5 +54,7 @@ export const EnumSignatures: [string, EnumSignature][] = [
     ['AppearanceTypes', { includes: ['HairID', 'BeardID', 'ShirtID'], excludes: ['Username']}],
     ['UISettings', { includes: ['UITheme', 'IsGameWindowFullScreen'] }],
     ['GameInterfaces', { includes: ['Inventory', 'Bank', 'Shop'] } ],
-    ['GameObjects', { includes: ['caveentrance', 'caveexit', 'oaktree'] }]
+    ['GameObjects', { includes: ['caveentrance', 'caveexit', 'oaktree'] }],
+    ['RequirementTypes', { includes: ['availableinventoryspace', 'equippeditem', 'quest', 'skill'] }],
+    ['SpellTypes', { includes: ['combat', 'status', 'inventory', 'teleport'] }],
 ];
