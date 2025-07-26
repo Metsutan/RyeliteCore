@@ -642,7 +642,7 @@ export class SettingsManager {
                         const min = parseFloat(numberInput.min);
                         const max = parseFloat(numberInput.max);
 
-                        if(newValue <= min || newValue >= max) {
+                        if(newValue < min || newValue > max) {
                             numberInput.style.border = '1px solid #ff4444';
                             numberInput.style.boxShadow =
                                 '0 0 0 2px rgba(255, 68, 68, 0.2)';
