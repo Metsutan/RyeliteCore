@@ -9,6 +9,7 @@ export class SettingsManager {
     private panelManager!: PanelManager;
     private database!: IDBPDatabase<HighliteSchema>;
     private pluginList!: Plugin[];
+    private username!: string;
 
     private pluginSettings!: { [plugin: string]: HTMLElement };
 
@@ -29,7 +30,31 @@ export class SettingsManager {
         this.database = document.highlite.managers.DatabaseManager.database;
         this.pluginList = document.highlite.plugins;
         this.panelManager = document.highlite.managers.PanelManager;
+        this.username = document.highlite.gameHooks.EntityManager.Instance._mainPlayer._nameLowerCase;
         this.createMenu();
+    }
+
+    deinit(): void {
+        this.panelManager.removeMenuItem('🛠️');
+        if (this.panelContainer) {
+            this.panelContainer.remove();
+            this.panelContainer = null;
+        }
+
+        if (this.currentView) {
+            this.currentView.remove();
+            this.currentView = null;
+        }
+
+        if (this.mainSettingsView) {
+            this.mainSettingsView.remove();
+            this.mainSettingsView = null;
+        }
+
+        if (this.pluginSettingsView) {
+            this.pluginSettingsView.remove();
+            this.pluginSettingsView = null;
+        }
     }
 
     /**
@@ -71,48 +96,57 @@ export class SettingsManager {
     }
 
     async registerPlugins() {
-        for (let plugin of this.pluginList) {
-            let pluginSettings = plugin.settings;
-            let settingStore:
-                | Record<string, boolean | number | string>
-                | undefined = {};
-            settingStore = await this.database.get(
-                'settings',
-                plugin.pluginName
-            );
-            if (settingStore) {
-                // store found so load settings
-                for (let settingKey in pluginSettings) {
-                    if (settingStore[settingKey] !== undefined) {
-                        // found the setting in the store
-                        pluginSettings[settingKey]!.value =
-                            settingStore[settingKey];
-                        
-                        // Call the setting's onLoaded callback if it exists
-                        if (pluginSettings[settingKey]!.onLoaded) {
-                            pluginSettings[settingKey]!.onLoaded.call(plugin);
+        // Obtain all plugin settings for a user
+        console.warn(`[Highlite] Loading settings for user: ${this.username}`);
+        let pluginSettings: Record<string, Record<string, boolean | number | string>> | undefined = {};
+        pluginSettings = await this.database.get('settings', this.username);
+
+        if (pluginSettings) {
+            // We have settings for the user, so load them into each plugin
+            for (const plugin in pluginSettings) {
+                const pluginSettingData = pluginSettings[plugin];
+                for (const settingKey in pluginSettingData) {
+                    if (pluginSettingData[settingKey] !== undefined) {
+                        // Find the plugin in the plugin list
+                        const foundPlugin = this.pluginList.find(
+                            p => p.pluginName === plugin
+                        );
+                        if (foundPlugin) {
+                            // If the setting exists, update it
+                            if (foundPlugin.settings[settingKey]) {
+                                foundPlugin.settings[settingKey]!.value =
+                                    pluginSettingData[settingKey];
+
+                                // Call the setting's onLoaded callback if it exists
+                                if (foundPlugin.settings[settingKey]!.onLoaded) {
+                                    foundPlugin.settings[settingKey]!.onLoaded.call(foundPlugin);
+                                }
+                            }
                         }
                     }
                 }
             }
-            await this.storePluginSettings(plugin); // store the settings after load which effectively updates the store with any new setting
-            
-            // Make settings reactive to automatically update UI when hidden property changes
+        }
+
+        // This will either "update" or "create" the settings for each plugin on a user.
+        for (let plugin of this.pluginList) {
+            await this.storePluginSettings(this.username, plugin);
             this.makeSettingsReactive(plugin);
-            
             this.createPluginSettings(plugin);
         }
     }
 
-    private async storePluginSettings(plugin: Plugin) {
+    private async storePluginSettings(username: string, plugin: Plugin) {
         let pluginSettings = plugin.settings;
         let pluginName = plugin.pluginName;
-        let settingStore: Record<string, boolean | number | string> = {};
+        let settingStore: Record<string, Record<string, boolean | number | string>> = {};
+        settingStore[pluginName] = {};
         for (let settingKey in pluginSettings) {
             let setting = pluginSettings[settingKey]!;
-            settingStore[settingKey] = setting.value;
+            settingStore[pluginName][settingKey] = setting.value;
         }
-        await this.database.put('settings', settingStore, pluginName);
+
+        await this.database.put('settings', settingStore, username);
     }
 
     private createMenu() {
@@ -272,7 +306,7 @@ export class SettingsManager {
         toggleSwitch.addEventListener('change', async () => {
             plugin.settings.enable.value = toggleSwitch.checked;
             plugin.settings.enable.callback.call(plugin);
-            await this.storePluginSettings(plugin);
+            await this.storePluginSettings('kkona', plugin);
         });
 
         // Cog is the character ⚙️
@@ -511,7 +545,7 @@ export class SettingsManager {
                         // Valid value - apply and save
                         setting.value = newValue;
                         setting.callback.call(plugin);
-                        await this.storePluginSettings(plugin);
+                        await this.storePluginSettings('kkona', plugin);
                         
                         // Refresh visibility of all settings in case dependencies changed
                         this.refreshPluginSettingsVisibility(plugin);
@@ -623,7 +657,7 @@ export class SettingsManager {
                         // Valid value - apply and save
                         setting.value = newValue;
                         setting.callback.call(plugin);
-                        await this.storePluginSettings(plugin);
+                        await this.storePluginSettings('kkona', plugin);
                         
                         // Refresh visibility of all settings in case dependencies changed
                         this.refreshPluginSettingsVisibility(plugin);
@@ -713,7 +747,7 @@ export class SettingsManager {
                         // Valid value - apply and save
                         setting.value = newValue;
                         setting.callback.call(plugin);
-                        await this.storePluginSettings(plugin);
+                        await this.storePluginSettings('kkona', plugin);
                         
                         // Refresh visibility of all settings in case dependencies changed
                         this.refreshPluginSettingsVisibility(plugin);
@@ -800,7 +834,7 @@ export class SettingsManager {
                         // Valid value - apply and save
                         setting.value = newValue;
                         setting.callback.call(plugin);
-                        await this.storePluginSettings(plugin);
+                        await this.storePluginSettings('kkona', plugin);
                         
                         // Refresh visibility of all settings in case dependencies changed
                         this.refreshPluginSettingsVisibility(plugin);

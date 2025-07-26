@@ -9,8 +9,8 @@ export interface HighliteSchema extends DBSchema {
         };
     };
     settings: {
-        key: string; //plugin name
-        value: Record<string, boolean | number | string>;
+        key: string; // User Name
+        value: Record<string, Record<string, boolean | number | string>>; // Plugin Name -> Setting Name -> Value
     };
     drop_logs: {
         key: number; //NPC defId

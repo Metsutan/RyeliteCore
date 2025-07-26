@@ -14,7 +14,7 @@ export class DatabaseManager {
     }
 
     async initDB() {
-        this.database = await openDB<HighliteSchema>('HighliteDatabase', 2, {
+        this.database = await openDB<HighliteSchema>('HighliteDatabase', 3, {
             upgrade(db, oldVersion) {
                 if (!db.objectStoreNames.contains('settings')) {
                     db.createObjectStore('settings');
@@ -24,6 +24,14 @@ export class DatabaseManager {
                     !db.objectStoreNames.contains('drop_logs')
                 ) {
                     db.createObjectStore('drop_logs');
+                }
+                if (
+                    oldVersion < 3 &&
+                    db.objectStoreNames.contains('settings')
+                ) {
+                    // Clear the settings store if it exists
+                    db.deleteObjectStore('settings');
+                    db.createObjectStore('settings');
                 }
             },
         });
