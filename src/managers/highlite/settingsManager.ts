@@ -511,14 +511,12 @@ export class SettingsManager {
                 contentRow.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.3)';
             });
 
-            // Capitalize the first letter of the name
+            // Use the setting's text property if available, otherwise generate from key name
             const capitalizedSettingName = settingKey.replace(
                 /([A-Z])/g,
                 ' $1'
             );
-            const finalizedSettingName =
-                capitalizedSettingName.charAt(0).toUpperCase() +
-                capitalizedSettingName.slice(1);
+            const finalizedSettingName = setting.text ? setting.text : capitalizedSettingName.charAt(0).toUpperCase() + capitalizedSettingName.slice(1);
 
             // Add appropriate input and label based on the setting name and type
 
