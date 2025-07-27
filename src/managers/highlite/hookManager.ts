@@ -159,7 +159,9 @@ export class HookManager {
         for (const plugin of document.highlite.plugins) {
             if (typeof plugin[fnName] === 'function') {
                 try {
-                    plugin[fnName].apply(plugin, args);
+                    if (plugin.settings.enable.value) {
+                        plugin[fnName].apply(plugin, args);
+                    }
                 } catch (error) {
                     console.error(
                         `[Highlite] Error in plugin ${plugin.pluginName} (${fnName}):`,
