@@ -39,7 +39,10 @@ export const ClassSignatures: [string, ClassSignature][] = [
     ['TargetActionManager', { methods: ['getActionsAndEntitiesAtMousePointer'] }],
     ['MagicSkillManager', { methods: ['canCastSpellAtLevel'] }],
     ['SpellMenuManager', { methods: ['_handleAutoCastChanged', '_handlePendingSpellChanged'] }],
-    ['QuestDefinitionManager', { methods: ['loadFromJSON', 'getDefById'], contains: 'QuestDefs' }]
+    ['QuestDefinitionManager', { methods: ['loadFromJSON', 'getDefById'], contains: 'QuestDefs' }],
+    ['StatsMenuManager', { methods: ['_handleStatItemPointerOver', '_handleStatItemPointerOut']}],
+    ['GameMenuBarManager', { methods: ['_handleGameMenuBarButtonPointerDown', '_toggleGameMenuBarButton']}],
+    ['ExperienceManager', { methods: ['getExperienceAtLevel', 'getLevelAtExperience']}]
 ];
 
 // Define the map of all class hook signatures
