@@ -66,15 +66,15 @@ export class SettingsManager {
     private makeSettingsReactive(plugin: Plugin): void {
         for (const settingKey in plugin.settings) {
             if (settingKey === 'enable') continue; // Skip enable setting
-            
+
             const setting = plugin.settings[settingKey];
-            
+
             // Create a proxy that intercepts property changes
             plugin.settings[settingKey] = new Proxy(setting, {
                 set: (target, property, value) => {
                     const oldValue = target[property as keyof typeof target];
                     (target as any)[property] = value;
-                    
+
                     // If the hidden property changed, update the UI
                     if (property === 'hidden' && oldValue !== value) {
                         // Small delay to ensure the property change is complete
@@ -82,7 +82,7 @@ export class SettingsManager {
                             this.refreshPluginSettingsVisibility(plugin);
                         }, 0);
                     }
-                    
+
                     // If the disabled property changed, update the UI
                     if (property === 'disabled' && oldValue !== value) {
                         // Small delay to ensure the property change is complete
@@ -90,7 +90,7 @@ export class SettingsManager {
                             this.refreshPluginSettingsDisabled(plugin);
                         }, 0);
                     }
-                    
+
                     return true;
                 }
             });
@@ -553,10 +553,10 @@ export class SettingsManager {
                         setting.value = newValue;
                         setting.callback.call(plugin);
                         await this.storePluginSettings(this.username, plugin);
-                        
+
                         // Refresh visibility of all settings in case dependencies changed
                         this.refreshPluginSettingsVisibility(plugin);
-                        
+
                         // Refresh disabled state of all settings in case dependencies changed
                         this.refreshPluginSettingsDisabled(plugin);
 
@@ -580,7 +580,6 @@ export class SettingsManager {
                     toggleLabel.style.whiteSpace = 'nowrap';
                     toggleLabel.style.overflow = 'hidden';
                     toggleLabel.style.textOverflow = 'ellipsis';
-                    toggleLabel.title = finalizedSettingName; // Show full text on hover
 
                     toggleLabel.addEventListener('click', () => {
                         toggleSwitch.click();
@@ -664,7 +663,7 @@ export class SettingsManager {
                         setting.value = newValue;
                         setting.callback.call(plugin);
                         await this.storePluginSettings(this.username, plugin);
-                        
+
                         // Refresh visibility of all settings in case dependencies changed
                         this.refreshPluginSettingsVisibility(plugin);
 
@@ -687,7 +686,6 @@ export class SettingsManager {
                     numberLabel.style.whiteSpace = 'nowrap';
                     numberLabel.style.overflow = 'hidden';
                     numberLabel.style.textOverflow = 'ellipsis';
-                    numberLabel.title = finalizedSettingName; // Show full text on hover
 
                     rangeContainer.appendChild(numberLabel);
                     rangeContainer.appendChild(numberInput);
@@ -753,7 +751,7 @@ export class SettingsManager {
                         setting.value = newValue;
                         setting.callback.call(plugin);
                         await this.storePluginSettings(this.username, plugin);
-                        
+
                         // Refresh visibility of all settings in case dependencies changed
                         this.refreshPluginSettingsVisibility(plugin);
 
@@ -776,7 +774,6 @@ export class SettingsManager {
                     colorLabel.style.whiteSpace = 'nowrap';
                     colorLabel.style.overflow = 'hidden';
                     colorLabel.style.textOverflow = 'ellipsis';
-                    colorLabel.title = finalizedSettingName; // Show full text on hover
 
                     colorContainer.appendChild(colorLabel);
                     colorContainer.appendChild(colorInput);
@@ -839,7 +836,7 @@ export class SettingsManager {
                         setting.value = newValue;
                         setting.callback.call(plugin);
                         await this.storePluginSettings(this.username, plugin);
-                        
+
                         // Refresh visibility of all settings in case dependencies changed
                         this.refreshPluginSettingsVisibility(plugin);
 
@@ -862,7 +859,6 @@ export class SettingsManager {
                     textLabel.style.whiteSpace = 'nowrap';
                     textLabel.style.overflow = 'hidden';
                     textLabel.style.textOverflow = 'ellipsis';
-                    textLabel.title = finalizedSettingName; // Show full text on hover
 
                     textContainer.appendChild(textLabel);
                     textContainer.appendChild(textInput);
@@ -901,7 +897,7 @@ export class SettingsManager {
 
                     buttonInput.addEventListener('click', async () => {
                         setting.callback.call(plugin);
-                        
+
                         // Refresh visibility of all settings in case dependencies changed
                         this.refreshPluginSettingsVisibility(plugin);
 
@@ -929,11 +925,106 @@ export class SettingsManager {
                     buttonContainer.appendChild(buttonInput);
                     contentRow.appendChild(buttonContainer);
                     break;
+
+                case SettingsTypes.combobox:
+                    const comboContainer = document.createElement('div');
+                    comboContainer.style.display = 'flex';
+                    comboContainer.style.flexDirection = 'column';
+                    comboContainer.style.gap = '8px';
+
+
+                    const comboLabel = document.createElement('label');
+                    comboLabel.innerText = finalizedSettingName;
+                    comboLabel.style.color = 'var(--theme-text-primary)';
+                    comboLabel.style.fontSize = '16px';
+                    comboLabel.style.margin = '0px';
+                    comboLabel.style.fontFamily =
+                        'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+                    comboLabel.style.fontWeight = '500';
+                    comboLabel.style.letterSpacing = '0.025em';
+                    comboLabel.style.whiteSpace = 'nowrap';
+                    comboLabel.style.overflow = 'hidden';
+                    comboLabel.style.textOverflow = 'ellipsis';
+
+                    if (!setting.options || !Array.isArray(setting.options) || setting.options.length < 1) {
+                        comboLabel.innerText = "Add a dataset array";
+                        contentRow.appendChild(comboLabel);
+                        break;
+                    }
+
+                    const comboSelect = document.createElement('select');
+
+                    comboSelect.addEventListener('change', async () => {
+                        const newValue = comboSelect.value;
+                        setting.value = newValue;
+                        setting.callback.call(plugin);
+                        await this.storePluginSettings(this.username, plugin);
+                        this.refreshPluginSettingsVisibility(plugin);
+                    });
+
+                    // Build combobox list from dataset
+                    for (let i = 0; i < setting.options.length; i++) {
+                        const option = String(setting.options[i]);
+                        const opt = document.createElement('option');
+                        opt.value = option;
+                        opt.textContent = option;
+                        comboSelect.appendChild(opt);
+                    }
+
+                    if (
+                        typeof setting.value !== 'string' ||
+                        !setting.options.includes(setting.value)
+                    ) {
+                        setting.value = setting.options[0];
+                        comboSelect.selectedIndex = 0;
+                        comboSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+
+                    comboSelect.value = setting.value as string;
+
+                    comboSelect.addEventListener('focus', e => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        comboSelect.style.border =
+                            '1px solid var(--theme-accent)';
+                        comboSelect.style.boxShadow =
+                            '0 0 0 2px var(--theme-accent-transparent-20)';
+                    });
+
+                    comboSelect.addEventListener('blur', () => {
+                        comboSelect.style.border =
+                            '1px solid var(--theme-border)';
+                        comboSelect.style.boxShadow = 'none';
+                    });
+
+                    comboSelect.style.padding = '8px 12px';
+                    comboSelect.style.borderRadius = '6px';
+                    comboSelect.style.border = '1px solid var(--theme-border)';
+                    comboSelect.style.background = 'var(--theme-background)';
+                    comboSelect.style.color = 'var(--theme-text-primary)';
+                    comboSelect.style.fontSize = '14px';
+                    comboSelect.style.fontFamily =
+                        'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+                    comboSelect.style.outline = 'none';
+                    comboSelect.style.transition = 'all 0.2s ease';
+                    comboSelect.style.cursor = 'pointer';
+                    comboSelect.style.width = '100%';
+                    comboSelect.style.height = '36px';
+
+                    comboContainer.appendChild(comboLabel);
+                    comboContainer.appendChild(comboSelect);
+                    contentRow.appendChild(comboContainer);
+
+                    break;
+
                 default:
-                    throw new Error(
-                        `[Highlite] Unsupported setting type: ${setting.type} for ${settingKey}`
-                    );
+                    // I don't think it should ever reach the default case
+                    throw new Error(`[Highlite] Unsupported setting type for ${settingKey}`);
             }
+    
+            contentRow.title = setting.description
+                ? setting.description
+                : finalizedSettingName;
 
             // Handle initially disabled state
             if (setting.disabled) {
@@ -1066,6 +1157,14 @@ export class SettingsManager {
                         textInput.value = setting.value as string;
                     }
                     break;
+                case SettingsTypes.combobox:
+                    const comboInput = contentRow.querySelector(
+                        'input[list]'
+                    ) as HTMLInputElement;
+                    if (comboInput) {
+                        comboInput.value = setting.value as string;
+                    }
+                    break;
             }
         }
     }
@@ -1077,17 +1176,17 @@ export class SettingsManager {
     private refreshPluginSettingsVisibility(plugin: Plugin): void {
         for (const settingKey in plugin.settings) {
             if (settingKey === 'enable') continue; // Skip enable setting
-            
+
             const setting = plugin.settings[settingKey];
             const contentRow = document.getElementById(`highlite-settings-content-row-${settingKey}`);
-            
+
             if (!contentRow) continue;
-            
+
             if (setting.hidden) {
                 // Hide with animation
                 contentRow.style.opacity = '0';
                 contentRow.style.transform = 'translateY(-10px)';
-                
+
                 setTimeout(() => {
                     contentRow.style.display = 'none';
                 }, 200);
@@ -1095,10 +1194,10 @@ export class SettingsManager {
                 // Show with animation
                 if (contentRow.style.display === 'none') {
                     contentRow.style.display = 'flex';
-                    
+
                     // Force reflow
                     contentRow.offsetHeight;
-                    
+
                     setTimeout(() => {
                         contentRow.style.opacity = '1';
                         contentRow.style.transform = 'translateY(0)';
@@ -1115,15 +1214,15 @@ export class SettingsManager {
     private refreshPluginSettingsDisabled(plugin: Plugin): void {
         for (const settingKey in plugin.settings) {
             if (settingKey === 'enable') continue; // Skip enable setting
-            
+
             const setting = plugin.settings[settingKey];
             const contentRow = document.getElementById(`highlite-settings-content-row-${settingKey}`);
-            
+
             if (!contentRow) continue;
-            
+
             // Find all input elements in the content row
             const inputs = contentRow.querySelectorAll('input, button');
-            
+
             inputs.forEach(input => {
                 const htmlInput = input as HTMLInputElement | HTMLButtonElement;
                 if (setting.disabled) {
@@ -1167,17 +1266,17 @@ export class SettingsManager {
             // Hide with animation
             contentRow.style.opacity = '0';
             contentRow.style.transform = 'translateY(-10px)';
-            
+
             setTimeout(() => {
                 contentRow.style.display = 'none';
             }, 200); // Wait for transition to complete
         } else {
             // Show with animation
             contentRow.style.display = 'flex';
-            
+
             // Force reflow to ensure display change takes effect
             contentRow.offsetHeight;
-            
+
             setTimeout(() => {
                 contentRow.style.opacity = '1';
                 contentRow.style.transform = 'translateY(0)';

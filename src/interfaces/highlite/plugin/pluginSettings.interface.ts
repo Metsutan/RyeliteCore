@@ -4,17 +4,51 @@ export enum SettingsTypes {
     color,
     text,
     button,
+    combobox,
 }
 
-export interface PluginSettings {
+interface BaseSettings<T> {
     text: string;
+    description?: string; // Optional description used for the hover title of the setting
     type: SettingsTypes;
-    value: boolean | number | string;
+    value: T;
     callback: Function;
-    validation?: (value: boolean | number | string) => boolean;
+    validation?: (value: T) => boolean;
     hidden?: boolean;
     disabled?: boolean;
     onLoaded?: Function; // Optional callback called when this setting is loaded from storage
-    min?: number;
-    max?: number;
 }
+
+interface RangeSettings extends BaseSettings<number> {
+    type: SettingsTypes.range;
+    min: number;
+    max: number;
+}
+
+interface ComboBoxSettings extends BaseSettings<string> {
+    type: SettingsTypes.combobox;
+    options: string[]; // Array of strings used to fill the combobox
+}
+
+interface CheckboxSettings extends BaseSettings<boolean> {
+    type: SettingsTypes.checkbox;
+}
+
+interface ButtonSettings extends BaseSettings<string> {
+    type: SettingsTypes.button;
+}
+
+interface TextSettings extends BaseSettings<string> {
+    type: SettingsTypes.text;
+}
+interface ColorSettings extends BaseSettings<string> {
+    type: SettingsTypes.color;
+}
+
+export type PluginSettings =
+    | RangeSettings
+    | ComboBoxSettings
+    | CheckboxSettings
+    | ButtonSettings
+    | TextSettings
+    | ColorSettings;
