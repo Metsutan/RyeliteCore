@@ -39,7 +39,7 @@ export class ItemTooltip {
         let itemDef: any = null;
         try {
             itemDef =
-                document.highlite.gameHooks.ItemDefMap.ItemDefMap.get(itemId);
+                document.highlite.gameHooks.ItemDefinitionManager._itemDefMap.get(itemId);
         } catch (error) {
             console.warn(
                 `Error getting item definition for ID ${itemId}:`,
