@@ -22,8 +22,7 @@ jobs:
         with:
           node-version: 22.x.x
           registry-url: https://npm.pkg.github.com/
-      - run: corepack enable
-      - run: yarn install
+      - run: npm install
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
