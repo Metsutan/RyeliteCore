@@ -15,9 +15,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-      - run: npm ci
-      - run: npm test
+          node-version: 22.x.x
+      - run: npm install
 
   publish-gpr:
     needs: build
@@ -29,7 +28,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22.x.x
           registry-url: https://npm.pkg.github.com/
       - run: npm ci
       - run: npm publish
