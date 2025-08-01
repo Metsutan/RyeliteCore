@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "build": "tsc",
-    "prepublishOnly": "yarn build"
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "highlite",
@@ -33,7 +33,6 @@
     "url": "https://github.com/Highl1te/Core/issues"
   },
   "homepage": "https://github.com/Highl1te/Core#readme",
-  "packageManager": "yarn@4.9.1",
   "dependencies": {
     "acorn": "^8.15.0",
     "acorn-walk": "^8.3.4",
