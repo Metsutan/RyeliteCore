@@ -314,7 +314,14 @@ export class SettingsManager {
         toggleSwitch.style.accentColor = 'var(--theme-accent)';
         toggleSwitch.addEventListener('change', async () => {
             plugin.settings.enable.value = toggleSwitch.checked;
-            plugin.settings.enable.callback.call(plugin);
+            
+            try {
+                plugin.settings.enable.callback.call(plugin);
+            } catch (error) {
+                console.error(`Error calling enable callback for plugin ${plugin.pluginName}:`, error);
+                console.error(`Continuing without calling the callback.`);
+            }
+            
             await this.storePluginSettings(this.username, plugin);
         });
 
@@ -551,7 +558,14 @@ export class SettingsManager {
 
                         // Valid value - apply and save
                         setting.value = newValue;
-                        setting.callback.call(plugin);
+
+                        try {
+                            setting.callback.call(plugin);
+                        } catch (error) {
+                            console.error(`Error calling callback for setting ${settingKey} in plugin ${plugin.pluginName}:`, error);
+                            console.error(`Continuing without calling the callback.`);
+                        }
+                        
                         await this.storePluginSettings(this.username, plugin);
 
                         // Refresh visibility of all settings in case dependencies changed
@@ -661,7 +675,12 @@ export class SettingsManager {
 
                         // Valid value - apply and save
                         setting.value = newValue;
-                        setting.callback.call(plugin);
+                        try {
+                            setting.callback.call(plugin);
+                        } catch (error) {
+                            console.error(`Error calling callback for setting ${settingKey} in plugin ${plugin.pluginName}:`, error);
+                            console.error(`Continuing without calling the callback.`);
+                        }
                         await this.storePluginSettings(this.username, plugin);
 
                         // Refresh visibility of all settings in case dependencies changed
@@ -749,7 +768,12 @@ export class SettingsManager {
 
                         // Valid value - apply and save
                         setting.value = newValue;
-                        setting.callback.call(plugin);
+                        try {
+                            setting.callback.call(plugin);
+                        } catch (error) {
+                            console.error(`Error calling callback for setting ${settingKey} in plugin ${plugin.pluginName}:`, error);
+                            console.error(`Continuing without calling the callback.`);
+                        }
                         await this.storePluginSettings(this.username, plugin);
 
                         // Refresh visibility of all settings in case dependencies changed
@@ -834,7 +858,12 @@ export class SettingsManager {
 
                         // Valid value - apply and save
                         setting.value = newValue;
-                        setting.callback.call(plugin);
+                        try {
+                            setting.callback.call(plugin);
+                        } catch (error) {
+                            console.error(`Error calling callback for setting ${settingKey} in plugin ${plugin.pluginName}:`, error);
+                            console.error(`Continuing without calling the callback.`);
+                        }
                         await this.storePluginSettings(this.username, plugin);
 
                         // Refresh visibility of all settings in case dependencies changed
@@ -896,7 +925,12 @@ export class SettingsManager {
                     buttonInput.innerText = finalizedSettingName;
 
                     buttonInput.addEventListener('click', async () => {
-                        setting.callback.call(plugin);
+                        try {
+                            setting.callback.call(plugin);
+                        } catch (error) {
+                            console.error(`Error calling callback for setting ${settingKey} in plugin ${plugin.pluginName}:`, error);
+                            console.error(`Continuing without calling the callback.`);
+                        }
 
                         // Refresh visibility of all settings in case dependencies changed
                         this.refreshPluginSettingsVisibility(plugin);
@@ -957,7 +991,12 @@ export class SettingsManager {
                     comboSelect.addEventListener('change', async () => {
                         const newValue = comboSelect.value;
                         setting.value = newValue;
-                        setting.callback.call(plugin);
+                        try {
+                            setting.callback.call(plugin);
+                        } catch (error) {
+                            console.error(`Error calling callback for setting ${settingKey} in plugin ${plugin.pluginName}:`, error);
+                            console.error(`Continuing without calling the callback.`);
+                        }
                         await this.storePluginSettings(this.username, plugin);
                         this.refreshPluginSettingsVisibility(plugin);
                     });
