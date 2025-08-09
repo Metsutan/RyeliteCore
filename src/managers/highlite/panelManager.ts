@@ -20,6 +20,12 @@ export class PanelManager {
         if (PanelManager.instance) {
             return PanelManager.instance;
         }
+
+        if (document.highlite.managers.PanelManager) {
+            PanelManager.instance = document.highlite.managers.PanelManager;
+            return document.highlite.managers.PanelManager;
+        }
+        
         PanelManager.instance = this;
         this.uiManager = new UIManager();
         document.highlite.managers.PanelManager = this;

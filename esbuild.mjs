@@ -3,7 +3,11 @@ import * as esbuild from 'esbuild';
 await esbuild.build({
     entryPoints: ['./src/index.ts'],
     bundle: true,
+    target: 'esnext',
+    format: 'esm',
     outfile: './dist/index.js',
-    sourcemap: true,
-    minify: true
+    minify: true,
+    keepNames: true,
+    treeShaking: true,
+    target: 'chrome138'
 });

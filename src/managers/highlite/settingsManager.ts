@@ -14,6 +14,8 @@ export class SettingsManager {
 
     private pluginSettings!: { [plugin: string]: HTMLElement };
 
+    public isInitialized = false;
+
     panelContainer: HTMLDivElement | null = null;
     currentView: HTMLDivElement | null = null;
     mainSettingsView: HTMLDivElement | null = null;
@@ -23,6 +25,12 @@ export class SettingsManager {
         if (SettingsManager.instance) {
             return SettingsManager.instance;
         }
+
+        if (document.highlite.managers.SettingsManager) {
+            SettingsManager.instance = document.highlite.managers.SettingsManager;
+            return document.highlite.managers.SettingsManager;
+        }
+
         SettingsManager.instance = this;
         document.highlite.managers.SettingsManager = this;
     }
@@ -33,10 +41,11 @@ export class SettingsManager {
         this.panelManager = document.highlite.managers.PanelManager;
         this.username = document.highlite.gameHooks.EntityManager.Instance._mainPlayer._nameLowerCase;
         this.createMenu();
+        this.isInitialized = true;
         return Promise.resolve();
     }
 
-    deinit(): void {
+    async deinit(): Promise<void> {
         this.panelManager.removeMenuItem('🛠️');
         if (this.panelContainer) {
             this.panelContainer.remove();
@@ -57,6 +66,18 @@ export class SettingsManager {
             this.pluginSettingsView.remove();
             this.pluginSettingsView = null;
         }
+
+        this.pluginSettings = {};
+
+        this.isInitialized = false;
+    }
+
+    async refresh(): Promise<void> {
+        if (!this.isInitialized) return;
+        await this.deinit();
+        console.warn("Refreshing settings...");
+        console.warn(this.pluginList);
+        await this.init();
     }
 
     /**

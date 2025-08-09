@@ -8,6 +8,14 @@ export interface HighliteSchema extends DBSchema {
             data: string; //base64 encoded data
         };
     };
+    plugins: {
+        key: string; // Plugin Name
+        value: {
+            author: string; // Plugin Author
+            digest: string; // Github Asset Digest
+            data: Blob; // Encoded Plugin Script
+        };
+    };
     settings: {
         key: string; // User Name
         value: Record<string, Record<string, boolean | number | string>>; // Plugin Name -> Setting Name -> Value

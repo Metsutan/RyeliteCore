@@ -15,6 +15,12 @@ export class UIManager {
         if (UIManager.instance) {
             return UIManager.instance;
         }
+
+        if (document.highlite.managers.UIManager) {
+            UIManager.instance = document.highlite.managers.UIManager;
+            return document.highlite.managers.UIManager;
+        }
+
         UIManager.instance = this;
         document.highlite.managers.UIManager = this;
     }

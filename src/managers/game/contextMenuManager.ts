@@ -35,6 +35,12 @@ export class ContextMenuManager {
         if (ContextMenuManager.instance) {
             return ContextMenuManager.instance;
         }
+
+        if (document.highlite.managers.ContextMenuManager) {
+            ContextMenuManager.instance = document.highlite.managers.ContextMenuManager;
+            return document.highlite.managers.ContextMenuManager;
+        }
+        
         ContextMenuManager.instance = this;
         document.highlite.managers.ContextMenuManager = this;
     }

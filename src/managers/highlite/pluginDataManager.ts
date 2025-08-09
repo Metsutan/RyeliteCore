@@ -14,7 +14,14 @@ export class PluginDataManager {
         if (PluginDataManager.instance) {
             return PluginDataManager.instance;
         }
+
+        if (document.highlite.managers.PluginDataManager) {
+            PluginDataManager.instance = document.highlite.managers.PluginDataManager;
+            return document.highlite.managers.PluginDataManager;
+        }
+
         PluginDataManager.instance = this;
+        document.highlite.managers.PluginDataManager = this;
     }
 
     public async initialize() {

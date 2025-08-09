@@ -9,12 +9,18 @@ export class DatabaseManager {
         if (DatabaseManager.instance) {
             return DatabaseManager.instance;
         }
+        
+        if (document.highlite.managers.DatabaseManager) {
+            DatabaseManager.instance = document.highlite.managers.DatabaseManager;
+            return document.highlite.managers.DatabaseManager;
+        }
+
         DatabaseManager.instance = this;
         document.highlite.managers.DatabaseManager = this;
     }
 
     async initDB() {
-        this.database = await openDB<HighliteSchema>('HighliteDatabase', 3, {
+        this.database = await openDB<HighliteSchema>('HighliteDatabase', 4, {
             upgrade(db, oldVersion) {
                 if (!db.objectStoreNames.contains('settings')) {
                     db.createObjectStore('settings');
@@ -32,6 +38,9 @@ export class DatabaseManager {
                         db.deleteObjectStore('settings');
                         db.createObjectStore('settings');
                     }
+                }
+                if (oldVersion < 4) {
+                    db.createObjectStore("plugins");
                 }
             },
         });

@@ -6,6 +6,12 @@ export class NotificationManager {
         if (NotificationManager.instance) {
             return NotificationManager.instance;
         }
+
+        if (document.highlite.managers.NotificationManager) {
+            NotificationManager.instance = document.highlite.managers.NotificationManager;
+            return document.highlite.managers.NotificationManager;
+        }
+
         NotificationManager.instance = this;
         document.highlite.managers.NotificationManager = this;
     }

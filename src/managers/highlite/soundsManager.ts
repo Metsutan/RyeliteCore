@@ -9,6 +9,12 @@ export class SoundManager {
         if (SoundManager.instance) {
             return SoundManager.instance;
         }
+
+        if (document.highlite.managers.SoundManager) {
+            SoundManager.instance = document.highlite.managers.SoundManager;
+            return document.highlite.managers.SoundManager;
+        }
+
         SoundManager.instance = this;
         document.highlite.managers.SoundManager = this;
     }

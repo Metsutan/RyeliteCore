@@ -5,6 +5,12 @@ export class HookManager {
         if (HookManager.instance) {
             return HookManager.instance;
         }
+
+        if (document.highlite.managers.HookManager) {
+            HookManager.instance = document.highlite.managers.HookManager;
+            return document.highlite.managers.HookManager;
+        }
+
         HookManager.instance = this;
         document.highlite.managers.HookManager = this;
     }

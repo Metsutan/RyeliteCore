@@ -1,5 +1,6 @@
 import type { Plugin } from '../../interfaces/highlite/plugin/plugin.class';
 import { PanelManager } from './panelManager';
+import { DatabaseManager, SettingsManager } from '../..';
 
 const PLUGIN_HUB_REPOSITORY = "https://api.github.com/repos/Highl1te/Plugin-Hub/releases/latest"
 
@@ -16,6 +17,8 @@ interface PluginConfig {
 export class PluginManager {
     private static instance: PluginManager;
     private panelManager : PanelManager = new PanelManager;
+    private databaseManager : DatabaseManager = new DatabaseManager;
+    private settingsManager : SettingsManager = new SettingsManager;
     private panelContent! : HTMLDivElement;
     plugins: Array<Plugin> = [];
 
@@ -23,10 +26,16 @@ export class PluginManager {
         if (PluginManager.instance) {
             return PluginManager.instance;
         }
+
+        if (document.highlite.managers.PluginManager) {
+            PluginManager.instance = document.highlite.managers.PluginManager;
+            return document.highlite.managers.PluginManager;
+        }
+
         PluginManager.instance = this;
         document.highlite.managers.PluginManager = this;
         document.highlite.plugins = this.plugins;
-        this.panelContent = this.panelManager.requestMenuItem("🏛️", "Plugin Hub")[1] as HTMLDivElement;
+        this.panelContent = this.panelManager.requestMenuItem("🗃️", "Plugin Hub")[1] as HTMLDivElement;
         
         // Apply consistent panel styling
         this.panelContent.style.display = 'flex';
@@ -35,9 +44,9 @@ export class PluginManager {
         this.panelContent.style.gap = '8px';
         this.panelContent.style.background = 'var(--theme-background)';
         this.panelContent.style.overflowY = 'auto';
-        this.panelContent.style.width = '--webkit-fill-available';
         this.panelContent.style.overflowX = 'hidden';
-        
+        this.panelContent.style.width = "-webkit-fill-available";
+
         this.populatePluginHub();
     }
 
@@ -48,6 +57,7 @@ export class PluginManager {
             const githubManifest = (await (await fetch(githubManifestURL, {headers: {'Accept': 'application/octet-stream'}})).json())
 
             for (const configuration of githubManifest) {
+                configuration.installed = false;
                 pluginConfigs.push(configuration as PluginConfig);
             }
         } catch {
@@ -156,16 +166,14 @@ export class PluginManager {
                 installBtn.style.transform = 'translateY(0)';
             });
 
+
+            const pluginImportData : {
+                class: (new () => Plugin) | undefined
+            } = {
+                class: undefined
+            };
             installBtn.onclick = async () => {
                 installBtn.disabled = true;
-                installBtn.textContent = 'Installing...';
-                installBtn.style.background = 'var(--theme-background-light)';
-                installBtn.style.color = 'var(--theme-text-secondary)';
-                installBtn.style.border = '1px solid var(--theme-border)';
-                installBtn.style.cursor = 'not-allowed';
-                installBtn.style.boxShadow = 'none';
-                installBtn.style.transform = 'none';
-
                 try {
                     const releasesUrl = `https://api.github.com/repos/${plugin.repository_owner}/${plugin.repository_name}/releases`;
                     const releasesResponse = await fetch(releasesUrl);
@@ -173,6 +181,12 @@ export class PluginManager {
                     const releases = await releasesResponse.json();
 
                     let matchingAssetUrl: string | null = null;
+
+                    const pluginData = {
+                        author: plugin.display_author ?? plugin.repository_owner,
+                        digest: plugin.asset_sha,
+                        data: new Blob()
+                    };
 
                     for (const release of releases) {
                         for (const asset of release.assets) {
@@ -186,7 +200,8 @@ export class PluginManager {
                                 
                                 if (assetResp.ok) {
                                     const buffer = await assetResp.arrayBuffer();
-                                    matchingAssetUrl = URL.createObjectURL(new Blob([buffer], { type: 'application/javascript' }));
+                                    pluginData.data = new Blob([buffer], { type: 'application/javascript' });
+                                    matchingAssetUrl = URL.createObjectURL(pluginData.data);
                                 }
                                 break;
                             }
@@ -200,18 +215,18 @@ export class PluginManager {
 
                     const pluginModule = await import(/* @vite-ignore */ matchingAssetUrl);
                     const PluginClass = pluginModule.default;
+                    pluginImportData.class = PluginClass;
 
                     if (typeof PluginClass !== 'function') {
                         throw new Error('Default export is not a valid plugin class');
                     }
 
-                    this.registerPlugin(PluginClass);
-
-                    installBtn.textContent = 'Installed!';
-                    installBtn.style.background = 'var(--theme-success)';
-                    installBtn.style.color = 'white';
-                    installBtn.style.border = '1px solid var(--theme-success-dark)';
-                    installBtn.style.boxShadow = '0 2px 4px var(--theme-success-transparent-30)';
+                    this.registerPlugin(PluginClass)
+                    this.databaseManager.database.put('plugins', pluginData, plugin.display_name ?? plugin.repository_name);
+                    await this.settingsManager.refresh();
+                    uninstallButton.disabled = false;
+                    card.removeChild(installBtn);
+                    card.appendChild(uninstallButton);
                 } catch (error) {
                     console.error(`[Highlite] Failed to install plugin:`, error);
                     installBtn.textContent = 'Failed';
@@ -222,12 +237,91 @@ export class PluginManager {
                 }
             };
 
+            const uninstallButton = document.createElement('button');
+            uninstallButton.textContent = 'Uninstall';
+            uninstallButton.style.padding = '8px 16px';
+            uninstallButton.style.background = 'var(--theme-danger)';
+            uninstallButton.style.color = 'white';
+            uninstallButton.style.border = '1px solid var(--theme-danger-dark)';
+            uninstallButton.style.borderRadius = '6px';
+            uninstallButton.style.cursor = 'pointer';
+            uninstallButton.style.fontSize = '14px';
+            uninstallButton.style.fontFamily = 'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+            uninstallButton.style.fontWeight = '500';
+            uninstallButton.style.transition = 'all 0.2s ease';
+            uninstallButton.style.boxShadow = '0 2px 4px var(--theme-danger-transparent-30)';
+            uninstallButton.style.letterSpacing = '0.025em';
+
+            // Add hover effect for uninstall button
+            uninstallButton.addEventListener('mouseenter', () => {
+                uninstallButton.style.background = 'var(--theme-danger-light)';
+                uninstallButton.style.boxShadow = '0 4px 8px var(--theme-danger-transparent-40)';
+                uninstallButton.style.transform = 'translateY(-1px)';
+            });
+            uninstallButton.addEventListener('mouseleave', () => {
+                uninstallButton.style.background = 'var(--theme-danger)';
+                uninstallButton.style.boxShadow = '0 2px 4px var(--theme-danger-transparent-30)';
+                uninstallButton.style.transform = 'translateY(0)';
+            });
+
+            uninstallButton.onclick = async () => {
+                try {
+                    await this.databaseManager.database.delete('plugins', plugin.display_name ?? plugin.repository_name);
+                    let installedPlugin: Plugin | undefined;
+                    if (pluginImportData.class) {
+                        installedPlugin = this.findPluginByClass(pluginImportData.class);
+                        if (installedPlugin) {
+                            this.unregisterPlugin(installedPlugin);
+                        }
+                    }
+
+                    // Remove uninstall button, add install button
+                    await this.settingsManager.refresh();
+                    installBtn.disabled = false;
+                    card.removeChild(uninstallButton);
+                    card.appendChild(installBtn);
+                } catch (error) {
+                    console.error(`[Highlite] Failed to uninstall plugin:`, error);
+                    uninstallButton.textContent = 'Failed';
+                    uninstallButton.style.background = 'var(--theme-danger)';
+                    uninstallButton.style.color = 'white';
+                    uninstallButton.style.border = '1px solid var(--theme-danger-dark)';
+                    uninstallButton.style.boxShadow = '0 2px 4px var(--theme-danger-transparent-30)';
+                }
+            };
+
             card.appendChild(title);
             card.appendChild(author);
             card.appendChild(description);
-            card.appendChild(installBtn);
+            
+
+            const isInstalled = await this.syncPluginState(plugin);
+
+            // If isInstalled, show uninstall button
+            if (isInstalled) {
+                card.appendChild(uninstallButton);
+            } else {
+                card.appendChild(installBtn);
+            }
 
             this.panelContent.appendChild(card);
+        }
+    }
+
+    async syncPluginState(plugin: PluginConfig) : Promise<Boolean> {
+        const installedPlugin = await this.databaseManager.database.get('plugins', plugin.display_name ?? plugin.repository_name);
+
+        if (installedPlugin) {
+            // If the plugin is "installed", go ahead and register it
+
+            // installedPlugin.data is a Blob
+            const pluginModule = await import(URL.createObjectURL(installedPlugin.data));
+            const pluginClass = pluginModule.default;
+            this.registerPlugin(pluginClass);
+
+            return true;
+        } else {
+            return false;
         }
     }
 
