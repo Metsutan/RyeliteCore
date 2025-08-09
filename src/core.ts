@@ -28,28 +28,21 @@ export class Highlite {
         document.highlite = {
             managers: {},
             gameHooks: {},
-            gameLookups: {},
-            plugins: [],
+            gameLookups: {}
         };
 
+        this.pluginManager = new PluginManager();
         this.hookManager = new HookManager();
+
         this.contextMenuManager = new ContextMenuManager();
         this.notificationManager = new NotificationManager();
-        this.pluginManager = new PluginManager();
+
         this.uiManager = new UIManager();
         this.panelManager = new PanelManager();
         this.soundManager = new SoundManager();
         this.settingsManager = new SettingsManager();
         this.databaseManager = new DatabaseManager();
         this.pluginDataManager = new PluginDataManager();
-
-        // Bind the classes from the hook manager (registerClass)
-        // Read all the found signature binding 
-        Reflector.bindClassHooks(this.hookManager);
-
-        // Bind the enums to the hook manager (registerEnum)
-        // These are the lookup tables
-        Reflector.bindEnumHooks(this.hookManager);
 
         this.initialize();
     }
@@ -72,7 +65,9 @@ export class Highlite {
         await this.settingsManager.registerPlugins();
         await this.pluginDataManager.initialize();
         for (const plugin of this.pluginManager.plugins) {
-            await this.pluginDataManager.addPlugin(plugin);
+            if (plugin.instance) {
+                await this.pluginDataManager.addPlugin(plugin.instance);
+            }
         }
         this.pluginManager.initAll();
         this.pluginManager.postInitAll();
@@ -88,6 +83,14 @@ export class Highlite {
 
     initialize() {
         console.info("[Highlite] Core Initializing")
+
+        // Bind the classes from the hook manager (registerClass)
+        // Read all the found signature binding 
+        Reflector.bindClassHooks(this.hookManager);
+
+        // Bind the enums to the hook manager (registerEnum)
+        // These are the lookup tables
+        Reflector.bindEnumHooks(this.hookManager);
 
         // Function Hook-ins
         this.hookManager.registerClassOverrideHook('LoginScreen', '_handleRegisterButtonClicked', this.loginHooks);
@@ -108,6 +111,9 @@ export class Highlite {
         this.contextMenuManager.registerContextHook('ContextMenuItemManager','_createGameWorldContextMenuItems', this.contextMenuManager.gameWorldContextHook);
         this.hookManager.registerStaticClassHook('TargetActionManager', 'handleTargetAction');
         this.hookManager.registerStaticClassHook('TargetActionManager','getActionsAndEntitiesAtMousePointer',this.contextMenuManager.ActionSorting);
+
+
+        this.pluginManager.initialize();
     }
 
     async start() {

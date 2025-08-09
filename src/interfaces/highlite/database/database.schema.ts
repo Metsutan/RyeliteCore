@@ -11,9 +11,15 @@ export interface HighliteSchema extends DBSchema {
     plugins: {
         key: string; // Plugin Name
         value: {
-            author: string; // Plugin Author
-            digest: string; // Github Asset Digest
-            data: Blob; // Encoded Plugin Script
+            config: {
+                repository_owner: string;
+                repository_name: string;
+                asset_sha: string;
+                display_name?: string;
+                display_author?: string;
+                display_description?: string;
+            };
+            blob: Blob;
         };
     };
     settings: {

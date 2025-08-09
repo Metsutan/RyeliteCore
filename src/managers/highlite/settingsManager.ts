@@ -37,7 +37,9 @@ export class SettingsManager {
 
     async init() {
         this.database = document.highlite.managers.DatabaseManager.database;
-        this.pluginList = document.highlite.plugins;
+        this.pluginList = document.highlite.managers.PluginManager.plugins;
+        this.pluginList = this.pluginList.map(plugin => plugin.instance).filter((instance): instance is Plugin => instance !== undefined);
+
         this.panelManager = document.highlite.managers.PanelManager;
         this.username = document.highlite.gameHooks.EntityManager.Instance._mainPlayer._nameLowerCase;
         this.createMenu();

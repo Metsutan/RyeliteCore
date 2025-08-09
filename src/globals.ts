@@ -1,5 +1,5 @@
 import type { Plugin } from './interfaces/highlite/plugin/plugin.class';
-
+import { PluginManager } from './managers/highlite/pluginManger';
 declare global {
     interface Window {
         [key: string]: any;
@@ -16,7 +16,6 @@ declare global {
             gameLookups: {
                 [key: string]: any;
             };
-            plugins: Array<Plugin>;
         };
 
         client: {

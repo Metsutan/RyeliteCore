@@ -13,6 +13,13 @@ interface PluginConfig {
     display_description? : string
 }
 
+export interface ManagedPlugin {
+    config: PluginConfig | undefined;
+    class: (new () => Plugin) | undefined;
+    instance: Plugin | undefined;
+    blob?: Blob | undefined;
+}
+
 
 export class PluginManager {
     private static instance: PluginManager;
@@ -20,8 +27,12 @@ export class PluginManager {
     private databaseManager : DatabaseManager = new DatabaseManager;
     private settingsManager : SettingsManager = new SettingsManager;
     private panelContent! : HTMLDivElement;
-    plugins: Array<Plugin> = [];
+    private managedPlugins: ManagedPlugin[] = [];
 
+    public get plugins() : ManagedPlugin[] {
+        return this.managedPlugins;
+    }
+    
     constructor() {
         if (PluginManager.instance) {
             return PluginManager.instance;
@@ -34,7 +45,10 @@ export class PluginManager {
 
         PluginManager.instance = this;
         document.highlite.managers.PluginManager = this;
-        document.highlite.plugins = this.plugins;
+    }
+
+
+    async initialize() {
         this.panelContent = this.panelManager.requestMenuItem("🗃️", "Plugin Hub")[1] as HTMLDivElement;
         
         // Apply consistent panel styling
@@ -47,10 +61,19 @@ export class PluginManager {
         this.panelContent.style.overflowX = 'hidden';
         this.panelContent.style.width = "-webkit-fill-available";
 
-        this.populatePluginHub();
+        const pluginConfigs = await this.obtainPluginConfigs();
+        for (const pluginConfig of pluginConfigs) {
+            const managedPlugin: ManagedPlugin = {
+                config: pluginConfig,
+                class: undefined,
+                instance: undefined
+            };
+            this.managedPlugins.push(managedPlugin);
+        }
+        await this.populatePluginHub();
     }
 
-    async obtainPluginListings() : Promise<PluginConfig[]> {
+    async obtainPluginConfigs() : Promise<PluginConfig[]> {
         let pluginConfigs : PluginConfig[] = [];
         try {
             const githubManifestURL = (await (await fetch(PLUGIN_HUB_REPOSITORY)).json())['assets'][0]['url']
@@ -64,15 +87,13 @@ export class PluginManager {
             // TODO: Should we allow resolution to some sort of error code to communicate to the user an error occured?
             return Promise.resolve(pluginConfigs);
         }
-        return Promise.resolve(pluginConfigs);
+        return Promise.resolve(pluginConfigs);    
     }
 
     async populatePluginHub() {
-        const availablePlugins = await this.obtainPluginListings();
-
         this.panelContent.innerHTML = ''; // Clear panel content
 
-        if (availablePlugins.length === 0) {
+        if (this.managedPlugins.length === 0) {
             const emptyMessage = document.createElement('div');
             emptyMessage.textContent = "No plugins available.";
             emptyMessage.style.textAlign = 'center';
@@ -87,7 +108,9 @@ export class PluginManager {
             return;
         }
 
-        for (const plugin of availablePlugins) {
+        for (const plugin of this.managedPlugins) {
+            if (!plugin.config) continue;
+
             const card = document.createElement('div');
             card.style.border = '1px solid var(--theme-border)';
             card.style.borderRadius = '8px';
@@ -111,7 +134,7 @@ export class PluginManager {
             });
 
             const title = document.createElement('h3');
-            title.textContent = plugin.display_name ?? plugin.repository_name;
+            title.textContent = plugin.config.display_name ?? plugin.config.repository_name;
             title.style.margin = '0 0 4px 0';
             title.style.fontSize = '16px';
             title.style.fontFamily = 'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
@@ -120,7 +143,7 @@ export class PluginManager {
             title.style.letterSpacing = '0.025em';
 
             const author = document.createElement('p');
-            author.textContent = `By ${plugin.display_author ?? plugin.repository_owner}`;
+            author.textContent = `By ${plugin.config.display_author ?? plugin.config.repository_owner}`;
             author.style.margin = '0 0 8px 0';
             author.style.fontStyle = 'italic';
             author.style.fontSize = '12px';
@@ -130,7 +153,7 @@ export class PluginManager {
             author.style.letterSpacing = '0.025em';
 
             const description = document.createElement('p');
-            description.textContent = plugin.display_description ?? 'No description provided.';
+            description.textContent = plugin.config.display_description ?? 'No description provided.';
             description.style.margin = '0 0 12px 0';
             description.style.fontSize = '14px';
             description.style.fontFamily = 'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
@@ -166,32 +189,21 @@ export class PluginManager {
                 installBtn.style.transform = 'translateY(0)';
             });
 
-
-            const pluginImportData : {
-                class: (new () => Plugin) | undefined
-            } = {
-                class: undefined
-            };
             installBtn.onclick = async () => {
                 installBtn.disabled = true;
                 try {
-                    const releasesUrl = `https://api.github.com/repos/${plugin.repository_owner}/${plugin.repository_name}/releases`;
+                    if (!plugin.config) return;
+                    const releasesUrl = `https://api.github.com/repos/${plugin.config.repository_owner}/${plugin.config.repository_name}/releases`;
                     const releasesResponse = await fetch(releasesUrl);
                     if (!releasesResponse.ok) throw new Error("Failed to fetch releases");
                     const releases = await releasesResponse.json();
 
                     let matchingAssetUrl: string | null = null;
 
-                    const pluginData = {
-                        author: plugin.display_author ?? plugin.repository_owner,
-                        digest: plugin.asset_sha,
-                        data: new Blob()
-                    };
-
                     for (const release of releases) {
                         for (const asset of release.assets) {
                             // Only check asset.digest for matches
-                            if (asset.digest === plugin.asset_sha) {
+                            if (asset.digest === plugin.config?.asset_sha) {
                                 // Download the asset to create a blob URL
                                 const assetApiUrl = asset.url;
                                 const assetResp = await fetch(assetApiUrl, {
@@ -200,8 +212,8 @@ export class PluginManager {
                                 
                                 if (assetResp.ok) {
                                     const buffer = await assetResp.arrayBuffer();
-                                    pluginData.data = new Blob([buffer], { type: 'application/javascript' });
-                                    matchingAssetUrl = URL.createObjectURL(pluginData.data);
+                                    plugin.blob = new Blob([buffer], { type: 'application/javascript' });
+                                    matchingAssetUrl = URL.createObjectURL(plugin.blob);
                                 }
                                 break;
                             }
@@ -210,19 +222,22 @@ export class PluginManager {
                     }
 
                     if (!matchingAssetUrl) {
-                        throw new Error(`No asset matched SHA: ${plugin.asset_sha}`);
+                        throw new Error(`No asset matched SHA: ${plugin.config.asset_sha}`);
                     }
 
                     const pluginModule = await import(/* @vite-ignore */ matchingAssetUrl);
                     const PluginClass = pluginModule.default;
-                    pluginImportData.class = PluginClass;
+                    plugin.class = PluginClass;
 
                     if (typeof PluginClass !== 'function') {
                         throw new Error('Default export is not a valid plugin class');
                     }
 
                     this.registerPlugin(PluginClass)
-                    this.databaseManager.database.put('plugins', pluginData, plugin.display_name ?? plugin.repository_name);
+                    this.databaseManager.database.put('plugins', {
+                        config: plugin.config,
+                        blob: plugin.blob!
+                    }, plugin.config.display_name ?? plugin.config.repository_name);
                     await this.settingsManager.refresh();
                     uninstallButton.disabled = false;
                     card.removeChild(installBtn);
@@ -266,10 +281,11 @@ export class PluginManager {
 
             uninstallButton.onclick = async () => {
                 try {
-                    await this.databaseManager.database.delete('plugins', plugin.display_name ?? plugin.repository_name);
+                    if (!plugin.config) return;
+                    await this.databaseManager.database.delete('plugins', plugin.config.display_name ?? plugin.config.repository_name);
                     let installedPlugin: Plugin | undefined;
-                    if (pluginImportData.class) {
-                        installedPlugin = this.findPluginByClass(pluginImportData.class);
+                    if (plugin.class) {
+                        installedPlugin = this.findPluginByClass(plugin.class);
                         if (installedPlugin) {
                             this.unregisterPlugin(installedPlugin);
                         }
@@ -295,33 +311,35 @@ export class PluginManager {
             card.appendChild(description);
             
 
-            const isInstalled = await this.syncPluginState(plugin);
+            const isInstalled = await this.syncPluginState(plugin.config);
 
             // If isInstalled, show uninstall button
             if (isInstalled) {
                 card.appendChild(uninstallButton);
+                plugin.blob = isInstalled;
             } else {
                 card.appendChild(installBtn);
+                plugin.blob = undefined;
             }
 
             this.panelContent.appendChild(card);
         }
     }
 
-    async syncPluginState(plugin: PluginConfig) : Promise<Boolean> {
+    async syncPluginState(plugin: PluginConfig) : Promise<Blob | undefined> {
         const installedPlugin = await this.databaseManager.database.get('plugins', plugin.display_name ?? plugin.repository_name);
 
         if (installedPlugin) {
             // If the plugin is "installed", go ahead and register it
 
             // installedPlugin.data is a Blob
-            const pluginModule = await import(URL.createObjectURL(installedPlugin.data));
+            const pluginModule = await import(URL.createObjectURL(installedPlugin.blob));
             const pluginClass = pluginModule.default;
             this.registerPlugin(pluginClass);
 
-            return true;
+            return installedPlugin.blob;
         } else {
-            return false;
+            return undefined;
         }
     }
 
@@ -332,17 +350,30 @@ export class PluginManager {
             `[Highlite] New plugin ${pluginInstance.pluginName} registered`
         );
 
-        this.plugins.push(pluginInstance);
+        // Find the managedPlugin entry for this class
+        let managedPlugin = this.managedPlugins.find(mp => mp.class === pluginClass);
+        if (!managedPlugin) {
+            // If not found, create a new ManagedPlugin entry
+            managedPlugin = {
+                config: undefined,
+                class: pluginClass,
+                instance: pluginInstance
+            };
+            this.managedPlugins.push(managedPlugin);
+        } else {
+            managedPlugin.class = pluginClass;
+            managedPlugin.instance = pluginInstance;
+        }
         return true;
     }
 
     initAll(): void {
         for (const plugin of this.plugins) {
             try {
-                plugin.init();
+                plugin.instance?.init();
             } catch (error) {
                 console.error(
-                    `[Highlite] Error initializing plugin ${plugin.pluginName}:`,
+                    `[Highlite] Error initializing plugin ${plugin.instance?.pluginName}:`,
                     error
                 );
             }
@@ -352,12 +383,12 @@ export class PluginManager {
     postInitAll(): void {
         for (const plugin of this.plugins) {
             try {
-                if (plugin.postInit) {
-                    plugin.postInit();
+                if (plugin.instance?.postInit) {
+                    plugin.instance.postInit();
                 }
             } catch (error) {
                 console.error(
-                    `[Highlite] Error post-initializing plugin ${plugin.pluginName}:`,
+                    `[Highlite] Error post-initializing plugin ${plugin.instance?.pluginName}:`,
                     error
                 );
             }
@@ -366,12 +397,12 @@ export class PluginManager {
 
     startAll(): void {
         for (const plugin of this.plugins) {
-            if (plugin.settings.enable.value) {
+            if (plugin.instance?.settings.enable.value) {
                 try {
-                    plugin.start();
+                    plugin.instance?.start();
                 } catch (error) {
                     console.error(
-                        `[Highlite] Error starting plugin ${plugin.pluginName}:`,
+                        `[Highlite] Error starting plugin ${plugin.instance?.pluginName}:`,
                         error
                     );
                 }
@@ -381,12 +412,12 @@ export class PluginManager {
 
     stopAll(): void {
         for (const plugin of this.plugins) {
-            if (plugin.settings.enable.value) {
+            if (plugin.instance?.settings.enable.value) {
                 try {
-                    plugin.stop();
+                    plugin.instance?.stop();
                 } catch (error) {
                     console.error(
-                        `[Highlite] Error stopping plugin ${plugin.pluginName}:`,
+                        `[Highlite] Error stopping plugin ${plugin.instance?.pluginName}:`,
                         error
                     );
                 }
@@ -395,24 +426,31 @@ export class PluginManager {
     }
 
     findPluginByName(pluginName: string): Plugin | undefined {
-        return this.plugins.find(plugin => plugin.pluginName === pluginName);
+        return this.plugins.find(managedPlugin => {
+            return managedPlugin.instance?.pluginName === pluginName;
+        })?.instance;
     }
 
     findPluginByClass(pluginClass: new () => Plugin): Plugin | undefined {
-        return this.plugins.find(plugin => plugin.constructor === pluginClass);
+        // Find by constructor, not instance
+        return this.plugins.find(managedPlugin => {
+            return managedPlugin.class && managedPlugin.instance && managedPlugin.instance.constructor === pluginClass;
+        })?.instance;
     }
 
     unregisterPlugin(plugin: Plugin): boolean {
         try {
             plugin.stop();
-            const index = this.plugins.indexOf(plugin);
-            if (index > -1) {
-                this.plugins.splice(index, 1);
-                console.info(
-                    `[Highlite] Plugin ${plugin.pluginName} unregistered`
-                );
-                return true;
+
+            const index = this.managedPlugins.findIndex(mp => mp.instance === plugin);
+            
+            // We can destory the instance and class and set them to undefined
+            if (index !== -1) {
+                this.managedPlugins[index].instance = undefined;
+                this.managedPlugins[index].class = undefined;
             }
+
+
         } catch (error) {
             console.error(
                 `[Highlite] Error unregistering plugin ${plugin.pluginName}:`,
@@ -420,57 +458,5 @@ export class PluginManager {
             );
         }
         return false;
-    }
-
-    hotReloadPlugin<T extends Plugin>(pluginClass: new () => T): boolean {
-        try {
-            // Create a temporary instance to get the plugin name
-            const tempPlugin = new pluginClass();
-            const pluginName = tempPlugin.pluginName;
-
-            console.info(`[Highlite] Hot reloading plugin ${pluginName}`);
-
-            // Find and remove old instance by name (more reliable than by class)
-            const oldPlugin = this.findPluginByName(pluginName);
-            if (oldPlugin) {
-                console.info(
-                    `[Highlite] Found existing plugin ${pluginName}, removing...`
-                );
-                this.unregisterPlugin(oldPlugin);
-            }
-
-            // Register new instance
-            const newPlugin = new pluginClass();
-            console.info(
-                `[Highlite] Registering new instance of ${newPlugin.pluginName}`
-            );
-
-            this.plugins.push(newPlugin);
-
-            // Initialize and start if it was previously enabled (or if no old plugin existed)
-            const shouldEnable = oldPlugin
-                ? oldPlugin.settings.enable.value
-                : newPlugin.settings.enable.value;
-
-            newPlugin.init();
-            console.info(`[Highlite] Initialized ${newPlugin.pluginName}`);
-
-            if (newPlugin.postInit) {
-                newPlugin.postInit();
-                console.info(
-                    `[Highlite] Post-initialized ${newPlugin.pluginName}`
-                );
-            }
-
-            if (shouldEnable) {
-                newPlugin.start();
-                console.info(`[Highlite] Started ${newPlugin.pluginName}`);
-            }
-
-            return true;
-        } catch (error) {
-            console.error(`[Highlite] Error hot reloading plugin:`, error);
-            return false;
-        }
     }
 }

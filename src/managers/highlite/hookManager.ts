@@ -162,15 +162,22 @@ export class HookManager {
     }
 
     private hook(fnName: string, ...args: any[]): void {
-        for (const plugin of document.highlite.plugins) {
-            if (typeof plugin[fnName] === 'function') {
+        if (!document.highlite.managers.PluginManager) {
+            console.warn(`[Highlite] Plugin Manager not initialized.`);
+            return;
+        }
+        for (const plugin of document.highlite.managers.PluginManager.plugins) {
+            if (!plugin.instance) {
+                continue;
+            }
+            if (typeof plugin.instance[fnName] === 'function') {
                 try {
-                    if (plugin.settings.enable.value) {
-                        plugin[fnName].apply(plugin, args);
+                    if (plugin.instance.settings.enable.value) {
+                        plugin.instance[fnName].apply(plugin.instance, args);
                     }
                 } catch (error) {
                     console.error(
-                        `[Highlite] Error in plugin ${plugin.pluginName} (${fnName}):`,
+                        `[Highlite] Error in plugin ${plugin.instance?.pluginName} (${fnName}):`,
                         error
                     );
                 }
