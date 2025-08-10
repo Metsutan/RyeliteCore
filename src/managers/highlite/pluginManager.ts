@@ -4,7 +4,9 @@ import { PanelManager } from './panelManager';
 import { DatabaseManager } from './databaseManager';
 import { SettingsManager } from './settingsManager';
 
-const PLUGIN_HUB_REPOSITORY = 'https://api.github.com/repos/Highl1te/Plugin-Hub/releases/latest';
+// Highlite mirror endpoints
+const HIGHLITE_MANIFEST_URL = 'https://www.highlite.dev/api/plugins/manifest.json';
+const HIGHLITE_MIRROR_BASE = 'https://www.highlite.dev/api/plugins';
 
 export interface ManagedPlugin {
     config: PluginConfig | undefined;
@@ -110,18 +112,12 @@ export class PluginManager {
     private async obtainPluginConfigs(): Promise<PluginConfig[]> {
         const pluginConfigs: PluginConfig[] = [];
         try {
-            const latest = await (await fetch(PLUGIN_HUB_REPOSITORY)).json();
-            const githubManifestURL = latest?.assets?.[0]?.url;
-            if (!githubManifestURL) return pluginConfigs;
-            const githubManifest = await (
-                await fetch(githubManifestURL, { headers: { Accept: 'application/octet-stream' } })
-            ).json();
-            for (const configuration of githubManifest) {
-                pluginConfigs.push(configuration as PluginConfig);
-            }
+            const res = await fetch(HIGHLITE_MANIFEST_URL, { cache: 'no-cache' });
+            if (!res.ok) throw new Error(`Manifest request failed: ${res.status}`);
+            const manifest = await res.json();
+            for (const configuration of manifest) pluginConfigs.push(configuration as PluginConfig);
         } catch (e) {
-            console.error('[Highlite] Failed to fetch plugin configs', e);
-            return pluginConfigs;
+            console.error('[Highlite] Failed to fetch plugin configs from mirror', e);
         }
         return pluginConfigs;
     }
@@ -423,34 +419,33 @@ export class PluginManager {
     private async downloadAndVerifyAsset(config: PluginConfig): Promise<string | null> {
         // If DB is not ready, fail fast
         if (!this.databaseManager.database) throw new Error('Database not initialized');
-        const releasesUrl = `https://api.github.com/repos/${config.repository_owner}/${config.repository_name}/releases`;
-        const releasesResponse = await fetch(releasesUrl);
-        if (!releasesResponse.ok) throw new Error('Failed to fetch releases');
-        const releases = await releasesResponse.json();
 
-        // Trust GitHub-provided asset.digest and only download the matching asset
-        for (const release of releases) {
-            const match = (release.assets ?? []).find((asset: any) => asset?.digest?.toLowerCase?.() === config.asset_sha.toLowerCase());
-            if (!match) continue;
-
-            const assetApiUrl = (match.url as string | undefined) ?? (match.browser_download_url as string | undefined);
-            if (!assetApiUrl) continue;
-            // Prefer API URL with Accept header to get binary
-            const assetResp = await fetch(assetApiUrl, { headers: { Accept: 'application/octet-stream' } });
-            if (!assetResp.ok) throw new Error('Failed to download asset');
-            const buffer = await assetResp.arrayBuffer();
-
-            const blob = new Blob([buffer], { type: 'application/javascript' });
-            const url = URL.createObjectURL(blob);
-            // store temp on a matching ManagedPlugin (by name)
-            const managed = this.managedPlugins.find((mp) => (mp.config?.display_name ?? mp.config?.repository_name) === (config.display_name ?? config.repository_name));
-            if (managed) {
-                managed.blob = blob;
-                managed.url = url;
-            }
-            return url;
+        // Download exclusively from Highlite mirror and verify against manifest sha
+        const mirrorUrl = `${HIGHLITE_MIRROR_BASE}/${config.repository_owner}/${config.display_name ?? config.repository_name}/`;
+        const resp = await fetch(mirrorUrl, { headers: { Accept: 'application/octet-stream' }, cache: 'no-cache' });
+        if (!resp.ok) throw new Error(`Mirror download failed (${resp.status})`);
+        const buffer = await resp.arrayBuffer();
+        if (config.asset_sha) {
+            const hex = "sha256:" + await this.sha256Hex(buffer);
+            const expected = (config.asset_sha ?? '').toLowerCase();
+            if (hex !== expected) throw new Error(`[Highlite] Mirror asset sha mismatch for ${config.repository_name}. expected=${expected} actual=${hex}`);
         }
-        return null;
+        const blob = new Blob([buffer], { type: 'application/javascript' });
+        const url = URL.createObjectURL(blob);
+        const managed = this.managedPlugins.find((mp) => (mp.config?.display_name ?? mp.config?.repository_name) === (config.display_name ?? config.repository_name));
+        if (managed) {
+            managed.blob = blob;
+            managed.url = url;
+        }
+        return url;
+    }
+
+    private async sha256Hex(buffer: ArrayBuffer): Promise<string> {
+        const digest = await crypto.subtle.digest('SHA-256', buffer);
+        const bytes = new Uint8Array(digest);
+        let hex = '';
+        for (let i = 0; i < bytes.length; i++) hex += bytes[i].toString(16).padStart(2, '0');
+        return hex;
     }
 
     private stylePrimaryButton(btn: HTMLButtonElement) {
