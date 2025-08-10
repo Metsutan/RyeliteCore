@@ -2,7 +2,7 @@ import { ContextMenuManager } from './managers/game/contextMenuManager';
 import { HookManager } from './managers/highlite/hookManager';
 import { NotificationManager } from './managers/highlite/notificationManager';
 import { PanelManager } from './managers/highlite/panelManager';
-import { PluginManager } from './managers/highlite/pluginManger';
+import { PluginManager } from './managers/highlite/pluginManager';
 import { PluginDataManager } from "./managers/highlite/pluginDataManager";
 import { UIManager } from './managers/highlite/uiManager';
 import { SettingsManager } from './managers/highlite/settingsManager';
@@ -113,7 +113,7 @@ export class Highlite {
         this.hookManager.registerStaticClassHook('TargetActionManager','getActionsAndEntitiesAtMousePointer',this.contextMenuManager.ActionSorting);
 
 
-        this.pluginManager.initialize();
+    // Plugin Hub UI will be initialized after DB is ready in start()
     }
 
     async start() {
@@ -126,6 +126,8 @@ export class Highlite {
             console.info('[Highlite] Database initialized!');
         }
         await this.notificationManager.askNotificationPermission();
+    // Initialize Plugin Hub now that DB is ready
+    await this.pluginManager.initialize();
     }
 
     stop() {

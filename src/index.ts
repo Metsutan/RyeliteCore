@@ -25,6 +25,7 @@ export * from './interfaces/highlite/database/database.schema';
 export * from './interfaces/highlite/plugin/plugin.class';
 export * from './interfaces/highlite/plugin/pluginSettings.interface';
 export * from './interfaces/highlite/plugin/TooltipConfig.interface';
+export * from './interfaces/highlite/plugin/PluginConfig.interface';
 
 // Game managers
 export * from './managers/game/contextMenuManager';
@@ -35,7 +36,7 @@ export * from './managers/highlite/hookManager';
 export * from './managers/highlite/itemTooltip';
 export * from './managers/highlite/notificationManager';
 export * from './managers/highlite/panelManager';
-export * from './managers/highlite/pluginManger';
+export * from './managers/highlite/pluginManager';
 export * from './managers/highlite/settingsManager';
 export * from './managers/highlite/soundsManager';
 export * from './managers/highlite/uiManager';

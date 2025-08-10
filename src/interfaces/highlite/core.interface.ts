@@ -1,7 +1,7 @@
 import type { HookManager } from '../../managers/highlite/hookManager';
 import type { ContextMenuManager } from '../../managers/game/contextMenuManager';
 import type { NotificationManager } from '../../managers/highlite/notificationManager';
-import type { PluginManager } from '../../managers/highlite/pluginManger';
+import type { PluginManager } from '../../managers/highlite/pluginManager';
 import type { UIManager } from '../../managers/highlite/uiManager';
 import type { PanelManager } from '../../managers/highlite/panelManager';
 import type { SettingsManager } from '../../managers/highlite/settingsManager';

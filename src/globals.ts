@@ -1,5 +1,5 @@
 import type { Plugin } from './interfaces/highlite/plugin/plugin.class';
-import { PluginManager } from './managers/highlite/pluginManger';
+import { PluginManager } from './managers/highlite/pluginManager';
 declare global {
     interface Window {
         [key: string]: any;

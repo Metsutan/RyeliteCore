@@ -1,4 +1,5 @@
 import type { DBSchema } from 'idb';
+import type { PluginConfig } from '../plugin/PluginConfig.interface';
 
 export interface HighliteSchema extends DBSchema {
     resources: {
@@ -11,14 +12,7 @@ export interface HighliteSchema extends DBSchema {
     plugins: {
         key: string; // Plugin Name
         value: {
-            config: {
-                repository_owner: string;
-                repository_name: string;
-                asset_sha: string;
-                display_name?: string;
-                display_author?: string;
-                display_description?: string;
-            };
+            config: PluginConfig;
             blob: Blob;
         };
     };

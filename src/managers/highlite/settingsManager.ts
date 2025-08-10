@@ -75,11 +75,11 @@ export class SettingsManager {
     }
 
     async refresh(): Promise<void> {
-        if (!this.isInitialized) return;
-        await this.deinit();
-        console.warn("Refreshing settings...");
-        console.warn(this.pluginList);
-        await this.init();
+    if (!this.isInitialized) return;
+    await this.deinit();
+    await this.init();
+    // Re-register to rebuild plugin list and UI rows after installs/uninstalls
+    await this.registerPlugins();
     }
 
     /**
