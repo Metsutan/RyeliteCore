@@ -28,10 +28,16 @@ export class PluginManager {
     private currentFilter: string = '';
     private didInitialSync = false;
     private managedPlugins: ManagedPlugin[] = [];
+    private isLoggedIn: boolean = false;
 
     public get plugins(): ManagedPlugin[] {
         return this.managedPlugins;
     }
+
+
+    public setLoginState(isLoggedIn: boolean) {
+        this.isLoggedIn = isLoggedIn;
+    };
 
     constructor() {
         if (PluginManager.instance) return PluginManager.instance;
@@ -512,6 +518,23 @@ export class PluginManager {
             managedPlugin.class = pluginClass;
             managedPlugin.instance = pluginInstance;
         }
+
+
+        // Check if we are logged in
+        if (this.isLoggedIn) {
+            if (pluginInstance.init) {
+                pluginInstance.init();
+            }
+
+            if (pluginInstance.postInit) {
+                pluginInstance.postInit();
+            }
+
+            if (pluginInstance.start) {
+                pluginInstance.start();
+            }
+        }
+
         return true;
     }
 

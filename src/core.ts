@@ -72,6 +72,7 @@ export class Highlite {
         this.pluginManager.initAll();
         this.pluginManager.postInitAll();
         this.pluginManager.startAll();
+        this.pluginManager.setLoginState(true);
     }
 
     async stopHook(fnName: string, ...args: any[]) {
@@ -79,6 +80,7 @@ export class Highlite {
         this.panelManager.forceClose();
         this.settingsManager.deinit();
         this.pluginManager.stopAll();
+        this.pluginManager.setLoginState(false);
     }
 
     initialize() {
