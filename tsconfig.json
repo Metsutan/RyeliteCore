@@ -14,7 +14,7 @@
         "declarationMap": false,
         "emitDeclarationOnly": false,
         "noEmit": false,
-        
+
         // Type Checking
         "strict": true,
         "noImplicitAny": false,

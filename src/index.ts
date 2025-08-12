@@ -1,3 +1,22 @@
+/*! 
+
+Copyright (C) 2025  HighLite
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+*/
+
 /* Export all modules */
 
 // Core modules
@@ -8,16 +27,7 @@ export * from './core';
 
 // Game interfaces and enums
 export * from './interfaces/game/ActionStates.enum';
-export * from './interfaces/game/Appearance.class';
-export * from './interfaces/game/Combat.class';
 export * from './interfaces/game/ContextMenuTypes.enum';
-export * from './interfaces/game/Ingredient.class';
-export * from './interfaces/game/Inventory.class';
-export * from './interfaces/game/Item.class';
-export * from './interfaces/game/ItemDefinition.class';
-export * from './interfaces/game/MainPlayer.class';
-export * from './interfaces/game/Recipe.class';
-export * from './interfaces/game/SkillExperience.class';
 
 // Highlite interfaces
 export * from './interfaces/highlite/core.interface';
