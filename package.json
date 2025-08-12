@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "build": "node esbuild.mjs && tsc --emitDeclarationOnly",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "yarn run build"
   },
   "keywords": [
     "highlite",
