@@ -1,13 +1,13 @@
-# @highlite/plugin-api
+# @highlite/core
 
-TypeScript type definitions for the Highlite Core Plugin Development Framework.
+This project/package provides two things in one a plugin type api to use during development as well as the core runtime used by HighLite compatible clients.
 
 ## Installation
 
 ```bash
-npm install @highlite/plugin-api
-# or
-yarn add @highlite/plugin-api
+npm install @highlite/core
+-or-
+yarn add @highlite/core
 ```
 
 ## Usage
@@ -15,7 +15,7 @@ yarn add @highlite/plugin-api
 This package provides TypeScript type definitions for developing Highlite plugins. Import the types you need:
 
 ```typescript
-import { Plugin, IHighlite, PluginSettings } from '@highlite/plugin-api';
+import { Plugin, IHighlite, PluginSettings } from '@highlite/core';
 
 export class MyPlugin extends Plugin {
     pluginName = 'MyAwesomePlugin';
@@ -38,23 +38,32 @@ export class MyPlugin extends Plugin {
 ## Available Types
 
 ### Core Interfaces
-- `IHighlite` - Main Highlite core interface
+
 - `Plugin` - Base plugin class to extend
 - `PluginSettings` - Plugin configuration interface
 
 ### Managers
-- `HookManager` - Game hook management
+
 - `NotificationManager` - In-game notifications
-- `UIManager` - User interface management
+- `ItemTooltip` - Generic Tooltip Manager
+- `UIManager` - Highlite Centric way of creating on-screen UI Elements
 - `PanelManager` - UI panel management
 - `SettingsManager` - Plugin settings management
 - `DatabaseManager` - Data persistence
 - `SoundManager` - Audio management
 - `ContextMenuManager` - Context menu handling
+- `PluginManager` - Plugin Standup and State Management
+
+### Reflector
+
+This system handles class inference and auto-reflection based off signatures found in `signatures.ts` to automatically make classes and their functions available to consume in plugins.
 
 ### Utilities
-- `Reflector` - Hooks onto the client and finds classes to be used as hooks
-- Various utility functions for value formatting and lookups
+
+* `AbbreviateValue` - Shortens large numbers to 1.1K, 1.11M, 1.111B, 1.1111T
+* `Resources` - An extremely light IDB wrapper (Likely to depreceated)
+* `LookupUtils` - Various helper functions for 
 
 ## Game Hooks
+
 If you are building a plugin please read our guide on [how to make Game Hooks](https://github.com/Highl1te/Core/blob/main/docs/gamehooks.md).

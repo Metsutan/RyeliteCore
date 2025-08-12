@@ -187,9 +187,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@highlite/plugin-api@workspace:.":
+"@highlite/core@workspace:.":
   version: 0.0.0-use.local
-  resolution: "@highlite/plugin-api@workspace:."
+  resolution: "@highlite/core@workspace:."
   dependencies:
     acorn: "npm:^8.15.0"
     acorn-walk: "npm:^8.3.4"

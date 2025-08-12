@@ -30,7 +30,6 @@ export * from './interfaces/game/ActionStates.enum';
 export * from './interfaces/game/ContextMenuTypes.enum';
 
 // Highlite interfaces
-export * from './interfaces/highlite/core.interface';
 export * from './interfaces/highlite/database/database.schema';
 export * from './interfaces/highlite/plugin/plugin.class';
 export * from './interfaces/highlite/plugin/pluginSettings.interface';
