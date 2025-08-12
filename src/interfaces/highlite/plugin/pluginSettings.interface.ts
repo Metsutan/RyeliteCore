@@ -5,6 +5,10 @@ export enum SettingsTypes {
     text,
     button,
     combobox,
+    textarea,
+    alert,
+    warning,
+    info,
 }
 
 interface BaseSettings<T> {
@@ -45,10 +49,30 @@ interface ColorSettings extends BaseSettings<string> {
     type: SettingsTypes.color;
 }
 
+interface TextAreaSettings extends BaseSettings<string> {
+    type: SettingsTypes.textarea;
+}
+
+interface AlertSettings extends BaseSettings<string> {
+    type: SettingsTypes.alert;
+}
+
+interface WarningSettings extends BaseSettings<string> {
+    type: SettingsTypes.warning;
+}
+
+interface InfoSettings extends BaseSettings<string> {
+    type: SettingsTypes.info;
+}
+
 export type PluginSettings =
     | RangeSettings
     | ComboBoxSettings
     | CheckboxSettings
     | ButtonSettings
     | TextSettings
-    | ColorSettings;
+    | ColorSettings
+    | TextAreaSettings
+    | AlertSettings
+    | WarningSettings
+    | InfoSettings;

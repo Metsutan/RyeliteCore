@@ -1087,9 +1087,207 @@ export class SettingsManager {
 
                     break;
 
+                case SettingsTypes.textarea:
+                    const textareaContainer = document.createElement('div');
+                    textareaContainer.style.display = 'flex';
+                    textareaContainer.style.flexDirection = 'column';
+                    textareaContainer.style.gap = '8px';
+
+                    const textareaInput = document.createElement('textarea');
+                    textareaInput.value = (setting.value as string) || '';
+                    textareaInput.style.padding = '8px 12px';
+                    textareaInput.style.borderRadius = '6px';
+                    textareaInput.style.border = '1px solid var(--theme-border)';
+                    textareaInput.style.background = 'var(--theme-background)';
+                    textareaInput.style.color = 'var(--theme-text-primary)';
+                    textareaInput.style.fontSize = '14px';
+                    textareaInput.style.fontFamily =
+                        'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+                    textareaInput.style.outline = 'none';
+                    textareaInput.style.transition = 'all 0.2s ease';
+                    textareaInput.style.resize = 'vertical';
+                    textareaInput.style.minHeight = '80px';
+                    textareaInput.style.maxHeight = '200px';
+
+                    // Add focus styling
+                    textareaInput.addEventListener('focus', e => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        textareaInput.style.border =
+                            '1px solid var(--theme-accent)';
+                        textareaInput.style.boxShadow =
+                            '0 0 0 2px var(--theme-accent-transparent-20)';
+                    });
+                    textareaInput.addEventListener('blur', () => {
+                        textareaInput.style.border =
+                            '1px solid var(--theme-border)';
+                        textareaInput.style.boxShadow = 'none';
+                    });
+
+                    textareaInput.addEventListener('change', async () => {
+                        const newValue = textareaInput.value;
+
+                        // Check validation if it exists
+                        if (
+                            setting.validation &&
+                            !setting.validation(newValue)
+                        ) {
+                            // Invalid value - revert to previous value and show error styling
+                            textareaInput.value = setting.value as string;
+                            textareaInput.style.border = '1px solid #ff4444';
+                            textareaInput.style.boxShadow =
+                                '0 0 0 2px rgba(255, 68, 68, 0.2)';
+                            return;
+                        }
+
+                        // Valid value - apply and save
+                        setting.value = newValue;
+                        setting.callback.call(plugin);
+                        await this.storePluginSettings(this.username, plugin);
+
+                        // Refresh visibility of all settings in case dependencies changed
+                        this.refreshPluginSettingsVisibility(plugin);
+
+                        // Reset styling to normal
+                        textareaInput.style.border =
+                            '1px solid var(--theme-border)';
+                        textareaInput.style.boxShadow = 'none';
+                    });
+
+                    // Add a label for the textarea input
+                    const textareaLabel = document.createElement('label');
+                    textareaLabel.innerText = finalizedSettingName;
+                    textareaLabel.style.color = 'var(--theme-text-primary)';
+                    textareaLabel.style.fontSize = '16px';
+                    textareaLabel.style.margin = '0px';
+                    textareaLabel.style.fontFamily =
+                        'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+                    textareaLabel.style.fontWeight = '500';
+                    textareaLabel.style.letterSpacing = '0.025em';
+                    textareaLabel.style.whiteSpace = 'nowrap';
+                    textareaLabel.style.overflow = 'hidden';
+                    textareaLabel.style.textOverflow = 'ellipsis';
+
+                    textareaContainer.appendChild(textareaLabel);
+                    textareaContainer.appendChild(textareaInput);
+                    contentRow.appendChild(textareaContainer);
+
+                    break;
+
+                case SettingsTypes.alert:
+                    const alertBox = document.createElement('div');
+                    alertBox.style.padding = '16px';
+                    alertBox.style.borderRadius = '6px';
+                    alertBox.style.border = '1px solid #dc3545';
+                    alertBox.style.background = '#f8d7da';
+                    alertBox.style.color = '#721c24';
+                    alertBox.style.fontSize = '14px';
+                    alertBox.style.fontFamily =
+                        'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+                    alertBox.style.fontWeight = '400';
+                    alertBox.style.lineHeight = '1.5';
+                    alertBox.style.textAlign = 'center';
+                    alertBox.style.display = 'flex';
+                    alertBox.style.flexDirection = 'column';
+                    alertBox.style.gap = '8px';
+
+                    // Add the title inside the alert box
+                    const alertTitle = document.createElement('div');
+                    alertTitle.innerText = finalizedSettingName;
+                    alertTitle.style.fontWeight = 'bold';
+                    alertTitle.style.fontSize = '16px';
+                    alertTitle.style.color = '#721c24';
+                    alertTitle.style.marginBottom = '4px';
+
+                    // Add the content
+                    const alertContent = document.createElement('div');
+                    alertContent.style.whiteSpace = 'pre-wrap';
+                    alertContent.textContent = (setting.value as string) || '';
+
+                    alertBox.appendChild(alertTitle);
+                    alertBox.appendChild(alertContent);
+                    contentRow.appendChild(alertBox);
+
+                    break;
+
+                case SettingsTypes.warning:
+                    const warningBox = document.createElement('div');
+                    warningBox.style.padding = '16px';
+                    warningBox.style.borderRadius = '6px';
+                    warningBox.style.border = '1px solid #ffc107';
+                    warningBox.style.background = '#fff3cd';
+                    warningBox.style.color = '#856404';
+                    warningBox.style.fontSize = '14px';
+                    warningBox.style.fontFamily =
+                        'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+                    warningBox.style.fontWeight = '400';
+                    warningBox.style.lineHeight = '1.5';
+                    warningBox.style.textAlign = 'center';
+                    warningBox.style.display = 'flex';
+                    warningBox.style.flexDirection = 'column';
+                    warningBox.style.gap = '8px';
+
+                    // Add the title inside the warning box
+                    const warningTitle = document.createElement('div');
+                    warningTitle.innerText = finalizedSettingName;
+                    warningTitle.style.fontWeight = 'bold';
+                    warningTitle.style.fontSize = '16px';
+                    warningTitle.style.color = '#856404';
+                    warningTitle.style.marginBottom = '4px';
+
+                    // Add the content
+                    const warningContent = document.createElement('div');
+                    warningContent.style.whiteSpace = 'pre-wrap';
+                    warningContent.textContent = (setting.value as string) || '';
+
+                    warningBox.appendChild(warningTitle);
+                    warningBox.appendChild(warningContent);
+                    contentRow.appendChild(warningBox);
+
+                    break;
+
+                case SettingsTypes.info:
+                    const infoBox = document.createElement('div');
+                    infoBox.style.padding = '16px';
+                    infoBox.style.borderRadius = '6px';
+                    infoBox.style.border = '1px solid #0dcaf0';
+                    infoBox.style.background = '#d1ecf1';
+                    infoBox.style.color = '#055160';
+                    infoBox.style.fontSize = '14px';
+                    infoBox.style.fontFamily =
+                        'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+                    infoBox.style.fontWeight = '400';
+                    infoBox.style.lineHeight = '1.5';
+                    infoBox.style.textAlign = 'center';
+                    infoBox.style.display = 'flex';
+                    infoBox.style.flexDirection = 'column';
+                    infoBox.style.gap = '8px';
+
+                    // Add the title inside the info box
+                    const infoTitle = document.createElement('div');
+                    infoTitle.innerText = finalizedSettingName;
+                    infoTitle.style.fontWeight = 'bold';
+                    infoTitle.style.fontSize = '16px';
+                    infoTitle.style.color = '#055160';
+                    infoTitle.style.marginBottom = '4px';
+
+                    // Add the content
+                    const infoContent = document.createElement('div');
+                    infoContent.style.whiteSpace = 'pre-wrap';
+                    infoContent.textContent = (setting.value as string) || '';
+
+                    infoBox.appendChild(infoTitle);
+                    infoBox.appendChild(infoContent);
+                    contentRow.appendChild(infoBox);
+
+                    break;
+
                 default:
-                    // I don't think it should ever reach the default case
-                    throw new Error(`[Highlite] Unsupported setting type for ${settingKey}`);
+                    // Debugging for error handling
+                    const settingType = (setting as any)?.type;
+                    const errorMessage = `[Highlite] Unsupported setting type for ${settingKey}. `;
+                    const fullErrorMessage = errorMessage.concat(settingType ? `Could not read type '${settingType}'` : `Setting type does not exist.`);
+                    throw new Error(fullErrorMessage);
             }
     
             contentRow.title = setting.description
@@ -1225,6 +1423,38 @@ export class SettingsManager {
                     ) as HTMLInputElement;
                     if (textInput) {
                         textInput.value = setting.value as string;
+                    }
+                    break;
+                case SettingsTypes.textarea:
+                    const textareaInput = contentRow.querySelector(
+                        'textarea'
+                    ) as HTMLTextAreaElement;
+                    if (textareaInput) {
+                        textareaInput.value = setting.value as string;
+                    }
+                    break;
+                case SettingsTypes.alert:
+                    const alertContent = contentRow.querySelector(
+                        'div > div:last-child'
+                    ) as HTMLDivElement;
+                    if (alertContent && contentRow.querySelector('div[style*="background: #f8d7da"]')) {
+                        alertContent.textContent = setting.value as string;
+                    }
+                    break;
+                case SettingsTypes.warning:
+                    const warningContent = contentRow.querySelector(
+                        'div > div:last-child'
+                    ) as HTMLDivElement;
+                    if (warningContent && contentRow.querySelector('div[style*="background: #fff3cd"]')) {
+                        warningContent.textContent = setting.value as string;
+                    }
+                    break;
+                case SettingsTypes.info:
+                    const infoContent = contentRow.querySelector(
+                        'div > div:last-child'
+                    ) as HTMLDivElement;
+                    if (infoContent && contentRow.querySelector('div[style*="background: #d1ecf1"]')) {
+                        infoContent.textContent = setting.value as string;
                     }
                     break;
                 case SettingsTypes.combobox:
