@@ -24,10 +24,10 @@
     "framework"
   ],
   "author": "Highl1te",
-  "license": "MIT",
+  "license": "GPL-3.0-only",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Highl1te/Core.git"
+    "url": "git+https://github.com/Highl1te/Core.git"
   },
   "bugs": {
     "url": "https://github.com/Highl1te/Core/issues"
@@ -45,9 +45,10 @@
     "typescript": "^5.9.2"
   },
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=22.0.0"
   },
   "publishConfig": {
+    "registry": "https://npm.pkg.github.com/",
     "access": "public"
   }
 }
