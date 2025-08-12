@@ -4,11 +4,11 @@ on:
   workflow_dispatch:
   release:
     types: [created]
-    
+
 permissions:
   contents: read
   id-token: write
-  
+
 jobs:
   publish-npm:
     runs-on: ubuntu-latest
@@ -20,4 +20,5 @@ jobs:
           registry-url: https://registry.npmjs.org/
       - run: corepack enable
       - run: yarn install --frozen-lockfile
+      - run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
       - run: npm publish
