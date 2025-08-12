@@ -114,6 +114,14 @@ export class SettingsManager {
                         }, 0);
                     }
 
+                    // When a setting value is changed, we need to make sure we store the new value
+                    if (property === 'value' && oldValue !== value) {
+                        // Small delay to ensure the property change is complete
+                        setTimeout(() => {
+                            this.storePluginSettings(this.username, plugin);
+                        }, 0);
+                    }
+
                     return true;
                 }
             });
