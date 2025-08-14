@@ -258,6 +258,7 @@ export class ItemTooltip {
                     'Bronze',
                     'Iron',
                     'Steel',
+                    'Silver',
                     'Palladium',
                     'Gold',
                     'Coronium',
