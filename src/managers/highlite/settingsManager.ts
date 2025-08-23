@@ -20,7 +20,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import { type IDBPDatabase } from 'idb';
 import type { HighliteSchema } from '../../interfaces/highlite/database/database.schema';
 import { type Plugin } from '../../interfaces/highlite/plugin/plugin.class';
-import { SettingsTypes } from '../../interfaces/highlite/plugin/pluginSettings.interface';
+import { PluginSettings, SettingsTypes } from '../../interfaces/highlite/plugin/pluginSettings.interface';
 import type { PanelManager } from './panelManager';
 
 export class SettingsManager {
@@ -177,7 +177,7 @@ export class SettingsManager {
                 }
             }
         }
-
+        
         // This will either "update" or "create" the settings for each plugin on a user.
         for (let plugin of this.pluginList) {
             await this.storePluginSettings(this.username, plugin);
@@ -226,6 +226,7 @@ export class SettingsManager {
         this.mainSettingsView.style.flexDirection = 'column';
         this.mainSettingsView.style.padding = '8px';
         this.mainSettingsView.style.gap = '2px';
+
 
         // Create search bar container
         const searchContainer = document.createElement('div');
@@ -285,6 +286,241 @@ export class SettingsManager {
         this.panelContainer.appendChild(this.currentView);
     }
 
+    private getAdvancedSettings(plugin: Plugin): HTMLElement {
+            const advancedBox = document.createElement('div');
+            // advancedBox.style.background = 'var(--theme-background-mute)';
+            // advancedBox.style.border = '1px solid var(--theme-border)';
+            // advancedBox.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.3)';
+            advancedBox.style.minHeight = '24px';
+            advancedBox.style.display = 'flex';
+            advancedBox.style.alignItems = 'left';
+            advancedBox.style.flexDirection = 'row';
+            advancedBox.style.gap = '4px';
+
+            const exportSettings = document.createElement('span');
+            exportSettings.innerText = '📱';
+            exportSettings.title = 'Export Settings To Clipboard';
+            exportSettings.style.color = 'var(--theme-text-muted)';
+            exportSettings.style.fontSize = '16px';
+            exportSettings.style.marginRight = '8px';
+            exportSettings.style.padding = '8px';
+            exportSettings.style.fontFamily =
+                'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+            exportSettings.style.textAlign = 'left';
+            exportSettings.style.cursor = 'pointer';
+            exportSettings.style.borderRadius = '4px';
+            exportSettings.style.transition = 'all 0.2s ease';
+            // Add hover effect for cog icon
+            exportSettings.addEventListener('mouseenter', () => {
+                exportSettings.style.color = 'var(--theme-text-primary)';
+                exportSettings.style.background = 'var(--theme-border-light)';
+                exportSettings.style.transform = 'scale(1.1)';
+            });
+            exportSettings.addEventListener('mouseleave', () => {
+                exportSettings.style.color = 'var(--theme-text-muted)';
+                exportSettings.style.background = 'transparent';
+                exportSettings.style.transform = 'scale(1)';
+            });
+            exportSettings.addEventListener('click', async () => {
+                const type = "text/plain"; // Need to do text plain since application/json is not guaranteed to be supported
+                const clipboardItemData = { 
+                    [type]: JSON.stringify({
+                        pluginName: plugin.pluginName,
+                        pluginSettings: plugin.settings,
+                    }),
+                };
+                const clipboardItem = new ClipboardItem(clipboardItemData);
+                await navigator.clipboard.write([clipboardItem]);
+            });
+            // If plugin only has the enable setting, hide import/export settings
+            if (Object.keys(plugin.settings).length === 1) {
+                exportSettings.style.display = 'none';
+            }
+            advancedBox.appendChild(exportSettings);
+            
+            const importSettings = document.createElement('span');
+            importSettings.innerText = '📲';
+            importSettings.title = 'Import Settings From Clipboard';
+            importSettings.style.color = 'var(--theme-text-muted)';
+            importSettings.style.fontSize = '16px';
+            importSettings.style.marginRight = '8px';
+            importSettings.style.padding = '8px';
+            importSettings.style.fontFamily =
+                'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+            importSettings.style.textAlign = 'left';
+            importSettings.style.cursor = 'pointer';
+            importSettings.style.borderRadius = '4px';
+            importSettings.style.transition = 'all 0.2s ease';
+            // Add hover effect for cog icon
+            importSettings.addEventListener('mouseenter', () => {
+                importSettings.style.color = 'var(--theme-text-primary)';
+                importSettings.style.background = 'var(--theme-border-light)';
+                importSettings.style.transform = 'scale(1.1)';
+            });
+            importSettings.addEventListener('mouseleave', () => {
+                importSettings.style.color = 'var(--theme-text-muted)';
+                importSettings.style.background = 'transparent';
+                importSettings.style.transform = 'scale(1)';
+            });
+            importSettings.addEventListener('click', async () => {
+                await navigator.clipboard
+                    .readText()
+                    .then((clipText) => {
+                        let importDataJson = JSON.parse(clipText);
+                        if(importDataJson.pluginName !== plugin.pluginName) {
+                            throw new Error('Mismatched plugin name')
+                        }
+                        if(!importDataJson.pluginSettings) {
+                            throw new Error('No settings found')
+                        }
+                        
+                        Object.entries(importDataJson.pluginSettings).forEach((entry) => {
+                            let key: string = entry[0];
+                            let value: PluginSettings = entry[1] as PluginSettings;
+                            plugin.settings[key].value = value.value;
+                        });
+                    }).catch((e) => {
+                        console.error("Attempted to import settings with invalid JSON", e);
+                    });
+                await this.storePluginSettings(this.username, plugin);
+
+                // Refresh visibility of all settings in case dependencies changed
+                this.refreshPluginSettingsVisibility(plugin);
+
+                // Refresh disabled state of all settings in case dependencies changed
+                this.refreshPluginSettingsDisabled(plugin);
+            });
+
+            // If plugin only has the enable setting, hide import/export settings
+            if (Object.keys(plugin.settings).length === 1) {
+                importSettings.style.display = 'none';
+            }
+            advancedBox.appendChild(importSettings);
+
+
+            
+            const exportdata = document.createElement('span');
+            exportdata.innerText = '📤';
+            exportdata.title = 'Export Data To Clipboard';
+            exportdata.style.color = 'var(--theme-text-muted)';
+            exportdata.style.fontSize = '16px';
+            exportdata.style.marginRight = '8px';
+            exportdata.style.padding = '8px';
+            exportdata.style.fontFamily =
+                'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+            exportdata.style.textAlign = 'left';
+            exportdata.style.cursor = 'pointer';
+            exportdata.style.borderRadius = '4px';
+            exportdata.style.transition = 'all 0.2s ease';
+            // Add hover effect for cog icon
+            exportdata.addEventListener('mouseenter', () => {
+                exportdata.style.color = 'var(--theme-text-primary)';
+                exportdata.style.background = 'var(--theme-border-light)';
+                exportdata.style.transform = 'scale(1.1)';
+            });
+            exportdata.addEventListener('mouseleave', () => {
+                exportdata.style.color = 'var(--theme-text-muted)';
+                exportdata.style.background = 'transparent';
+                exportdata.style.transform = 'scale(1)';
+            });
+            exportdata.addEventListener('click', async () => {
+                const type = "text/plain"; // Need to do 'text/plain' since application/json is not guaranteed to be supported
+                const clipboardItemData = {
+                    [type]: JSON.stringify({
+                        pluginName: plugin.pluginName,
+                        pluginData: plugin.data
+                    })
+                };
+                const clipboardItem = new ClipboardItem(clipboardItemData);
+                await navigator.clipboard.write([clipboardItem]);
+            });
+            // If plugin lacks data, hide export data
+            if (Object.keys(plugin.data).length === 1) {
+                exportdata.style.display = 'none';
+            }
+            advancedBox.appendChild(exportdata);
+
+
+            const importdata = document.createElement('span');
+            importdata.innerText = '📥';
+            importdata.title = 'Import Data From Clipboard'
+            importdata.style.color = 'var(--theme-text-muted)';
+            importdata.style.fontSize = '16px';
+            importdata.style.marginRight = '8px';
+            importdata.style.padding = '8px';
+            importdata.style.fontFamily =
+                'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+            importdata.style.textAlign = 'left';
+            importdata.style.cursor = 'pointer';
+            importdata.style.borderRadius = '4px';
+            importdata.style.transition = 'all 0.2s ease';
+            // Add hover effect for cog icon
+            importdata.addEventListener('mouseenter', () => {
+                importdata.style.color = 'var(--theme-text-primary)';
+                importdata.style.background = 'var(--theme-border-light)';
+                importdata.style.transform = 'scale(1.1)';
+            });
+            importdata.addEventListener('mouseleave', () => {
+                importdata.style.color = 'var(--theme-text-muted)';
+                importdata.style.background = 'transparent';
+                importdata.style.transform = 'scale(1)';
+            });
+            importdata.addEventListener('click', async () => {
+                await navigator.clipboard
+                    .readText()
+                    .then(async (clipText) => {
+                        let importDataJson = JSON.parse(clipText);
+
+                        if(importDataJson.pluginName !== plugin.pluginName) {
+                            throw new Error('Mismatched plugin name')
+                        }
+                        if(!importDataJson.pluginData) {
+                            throw new Error('No data found')
+                        }
+
+                        var originallyEnabled = plugin.settings.enable.value;
+
+                        if(originallyEnabled) {
+                            // Turn off plugin before modifying
+                            plugin.settings.enable.value = false;
+                            try {
+                                plugin.settings.enable.callback.call(plugin);
+                            } catch (error) {
+                                console.error(`Error calling enable callback for plugin ${plugin.pluginName}:`, error);
+                                console.error(`Continuing without calling the callback.`);
+                            }
+                            await this.storePluginSettings(this.username, plugin);
+                        }
+
+                        // Clear extra data first
+                        Object.entries(plugin.data).forEach(([key, value]) => {
+                            delete plugin.data[key];
+                        })
+
+                        Object.entries(importDataJson.pluginData).forEach(([key, value]) => {
+                            plugin.data[key] = value;
+                        })
+
+                        if(originallyEnabled) {
+                            // Reenable plugin
+                            plugin.settings.enable.value = true;
+                            try {
+                                plugin.settings.enable.callback.call(plugin);
+                            } catch (error) {
+                                console.error(`Error calling enable callback for plugin ${plugin.pluginName}:`, error);
+                                console.error(`Continuing without calling the callback.`);
+                            }
+                            await this.storePluginSettings(this.username, plugin);
+                        }
+
+                    }).catch((e) => {
+                        console.error("Attempted to import data with invalid JSON", e);
+                    });
+            });
+            advancedBox.appendChild(importdata);
+
+            return advancedBox;
+    }
     private createPluginSettings(plugin: Plugin) {
         const contentRow = document.createElement('div');
         contentRow.id = `highlite-settings-content-row-${plugin.pluginName}`;
@@ -480,6 +716,39 @@ export class SettingsManager {
         titleRow.appendChild(title);
         titleRow.appendChild(authorText);
         this.pluginSettingsView.appendChild(titleRow);
+        
+        // Create an import/export row for the settings panel
+        const pluginImportExportPanel = document.createElement('div');
+        pluginImportExportPanel.id = 'highlite-settings-title-row';
+        pluginImportExportPanel.style.minHeight = '60px';
+        pluginImportExportPanel.style.display = 'flex';
+        pluginImportExportPanel.style.alignItems = 'center';
+        pluginImportExportPanel.style.justifyContent = 'center';
+        pluginImportExportPanel.style.flexDirection = 'column';
+        pluginImportExportPanel.style.background = 'var(--theme-background-mute)';
+        pluginImportExportPanel.style.borderRadius = '8px';
+        pluginImportExportPanel.style.border = '1px solid var(--theme-border)';
+        pluginImportExportPanel.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.3)';
+        pluginImportExportPanel.style.marginBottom = '8px';
+        pluginImportExportPanel.style.padding = '16px';
+        
+        const pluginImportExportTitle = document.createElement('span');
+        pluginImportExportTitle.innerText = "Transfer Plugin Data";
+        pluginImportExportTitle.style.color = 'var(--theme-text-primary)';
+        pluginImportExportTitle.style.fontSize = '16px';
+        pluginImportExportTitle.style.paddingBottom = '8px';
+        pluginImportExportTitle.style.fontFamily =
+            'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+        pluginImportExportTitle.style.fontWeight = '500';
+        pluginImportExportTitle.style.textAlign = 'left';
+        pluginImportExportTitle.style.letterSpacing = '0.025em';
+        pluginImportExportTitle.style.whiteSpace = 'nowrap';
+        pluginImportExportTitle.title = `⚠️ Only import data and settings from trusted sources.`;
+        pluginImportExportPanel.appendChild(pluginImportExportTitle);
+        
+        pluginImportExportPanel.appendChild(this.getAdvancedSettings(plugin));
+        
+        this.pluginSettingsView.appendChild(pluginImportExportPanel);
 
         // Add a back button in the form of a small row
         const backButton = document.createElement('div');
@@ -526,7 +795,7 @@ export class SettingsManager {
         });
 
         this.pluginSettingsView.appendChild(backButton);
-
+        
         // For each plugin setting, create a row with the setting name and appropriate input
         for (const settingKey in plugin.settings) {
             if (settingKey === 'enable') {
