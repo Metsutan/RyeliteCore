@@ -114,7 +114,7 @@ export class ContextMenuManager {
         handleFunction: Function,
         entityType: EntityType = EntityType.Any
     ): number {
-        const ContextMenuActions = document.client.get('VA');
+        const ContextMenuActions = document.highlite.gameLookups['GameWorldActions'];
 
         let actionNumber = -1;
         if (ContextMenuActions[actionName] === undefined) {
