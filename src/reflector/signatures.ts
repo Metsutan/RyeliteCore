@@ -26,7 +26,7 @@ export const ClassSignatures: [string, ClassSignature][] = [
     ['EntityManager', { methods: ['CurrentOnlinePlayerCount', 'NPCs'] }],
     ['GroundItemManager', { methods: ['GroundItemCount'] }],
     ['MeshManager', { methods: ['getInstanceCountForMeshByFileName'] }],
-    ['WorldMapManager', { methods: ['CurrentMapCenterCoordinates'] }],
+    ['WorldMapManager', { methods: ['NextWorldEntityTypeID'] }],
     ['AtmosphereManager', { methods: ['_initializeEarthOverworldAtmosphere'] }],
     ['WorldEntityManager', { methods: ['WorldEntities'] }],
     ['SpellManager', { methods: ['CurrentlySelectedSpell'] }],
