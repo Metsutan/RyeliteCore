@@ -1,8 +1,6 @@
 # @highlite/core 
 
-**As of 9/18/2025 Highl1te Development has been paused indefinitely**
-
-This project/package provides two things in one a plugin type api to use during development as well as the core runtime used by HighLite compatible clients.
+This project/package provides two things in one. A plugin-type api to use during development as well as the core runtime used by RyeLite compatible clients.
 
 ## Installation
 
