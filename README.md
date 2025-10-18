@@ -1,4 +1,4 @@
-# @highlite/core 
+# @ryelite/core 
 
 This project/package provides two things in one. A plugin-type api to use during development as well as the core runtime used by RyeLite compatible clients.
 
