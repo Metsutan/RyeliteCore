@@ -1573,7 +1573,7 @@ export class SettingsManager {
                 default:
                     // Debugging for error handling
                     const settingType = (setting as any)?.type;
-                    const errorMessage = `[Highlite] Unsupported setting type for ${settingKey}. `;
+                    const errorMessage = `[Ryelite] Unsupported setting type for ${settingKey}. `;
                     const fullErrorMessage = errorMessage.concat(settingType ? `Could not read type '${settingType}'` : `Setting type does not exist.`);
                     throw new Error(fullErrorMessage);
             }

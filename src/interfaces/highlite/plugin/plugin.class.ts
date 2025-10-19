@@ -64,18 +64,18 @@ export abstract class Plugin {
 
     // Log seems to be broken from loading HighSpell Client
     log(...args: any[]): void {
-        console.info(`[Highlite][${this.pluginName} Plugin]`, ...args);
+        console.info(`[RyeLite][${this.pluginName} Plugin]`, ...args);
     }
 
     info(...args: any[]): void {
-        console.info(`[Highlite][${this.pluginName} Plugin]`, ...args);
+        console.info(`[RyeLite][${this.pluginName} Plugin]`, ...args);
     }
 
     warn(...args: any[]): void {
-        console.warn(`[Highlite][${this.pluginName} Plugin]`, ...args);
+        console.warn(`[RyeLite][${this.pluginName} Plugin]`, ...args);
     }
 
     error(...args: any[]): void {
-        console.error(`[Highlite][${this.pluginName} Plugin]`, ...args);
+        console.error(`[RyeLite][${this.pluginName} Plugin]`, ...args);
     }
 }

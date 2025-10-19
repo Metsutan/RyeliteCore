@@ -42,7 +42,7 @@ export class Highlite {
     pluginDataManager: PluginDataManager;
 
     constructor() {
-        console.info('[Highlite] Core Initializing!');
+        console.info('[Ryelite] Core Initializing!');
 
         document.highlite = {
             managers: {},
@@ -67,7 +67,7 @@ export class Highlite {
     }
 
 
-    // NOTE: The login screen buttons attempt to open up in the highlite window without these.
+    // NOTE: The login screen buttons attempt to open up in the ryelite window without these.
     async loginHooks(fnName: string, ...args: any[]) {
         if (fnName === 'LoginScreen_handleRegisterButtonClicked') {
             window.open('https://highspell.com/register', '_blank');
@@ -95,7 +95,7 @@ export class Highlite {
     }
 
     async stopHook(fnName: string, ...args: any[]) {
-        console.warn(`[Highlite] Stopping all plugins due to: ${fnName}`);
+        console.warn(`[Ryelite] Stopping all plugins due to: ${fnName}`);
         this.panelManager.forceClose();
         this.settingsManager.deinit();
         this.pluginManager.stopAll();
@@ -103,7 +103,7 @@ export class Highlite {
     }
 
     initialize() {
-        console.info("[Highlite] Core Initializing")
+        console.info("[Ryelite] Core Initializing")
 
         // Bind the classes from the hook manager (registerClass)
         // Read all the found signature binding 
@@ -138,13 +138,13 @@ export class Highlite {
     }
 
     async start() {
-        console.info('[Highlite] Core Started!');
+        console.info('[Ryelite] Core Started!');
         await this.databaseManager.initDB();
         if (!this.databaseManager.database) {
-            console.error('[Highlite] Database not initialized!');
+            console.error('[Ryelite] Database not initialized!');
             return;
         } else {
-            console.info('[Highlite] Database initialized!');
+            console.info('[Ryelite] Database initialized!');
         }
         await this.notificationManager.askNotificationPermission();
     // Initialize Plugin Hub now that DB is ready
@@ -152,12 +152,12 @@ export class Highlite {
     }
 
     stop() {
-        console.info('[Highlite] Core Stopped!');
+        console.info('[Ryelite] Core Stopped!');
         this.pluginManager.stopAll();
     }
 
     reload() {
-        console.info('[Highlite] Core Reloading');
+        console.info('[Ryelite] Core Reloading');
         this.stop();
         this.start();
     }
