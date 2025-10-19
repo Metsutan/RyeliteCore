@@ -39,7 +39,7 @@ export class HookManager {
 
         if (!classInstance) {
             console.warn(
-                `[Highlite] ${className} (${mappedName}) is not defined in client.`
+                `[Ryelite] ${className} (${mappedName}) is not defined in client.`
             );
             return false;
         }
@@ -79,7 +79,7 @@ export class HookManager {
 
         if (!enumInstance) {
             console.warn(
-                `[Highlite] ${enumName} (${mappedName}) is not defined in client.`
+                `[Ryelite] ${enumName} (${mappedName}) is not defined in client.`
             );
             return false;
         }
@@ -98,7 +98,7 @@ export class HookManager {
 
         if (!classObject) {
             console.warn(
-                `[Highlite] Attempted to register unknown client class hook (${sourceClass}).`
+                `[Ryelite] Attempted to register unknown client class hook (${sourceClass}).`
             );
             return false;
         }
@@ -130,7 +130,7 @@ export class HookManager {
 
         if (!classObject) {
             console.warn(
-                `[Highlite] Attempted to register unknown client class override hook (${sourceClass}).`
+                `[Ryelite] Attempted to register unknown client class override hook (${sourceClass}).`
             );
             return false;
         }
@@ -159,7 +159,7 @@ export class HookManager {
 
         if (!classObject) {
             console.warn(
-                `[Highlite] Attempted to register unknown static client class hook (${sourceClass}).`
+                `[Ryelite] Attempted to register unknown static client class hook (${sourceClass}).`
             );
             return false;
         }
@@ -182,7 +182,7 @@ export class HookManager {
 
     private hook(fnName: string, ...args: any[]): void {
         if (!document.highlite.managers.PluginManager) {
-            console.warn(`[Highlite] Plugin Manager not initialized.`);
+            console.warn(`[Ryelite] Plugin Manager not initialized.`);
             return;
         }
         for (const plugin of document.highlite.managers.PluginManager.plugins) {
@@ -196,7 +196,7 @@ export class HookManager {
                     }
                 } catch (error) {
                     console.error(
-                        `[Highlite] Error in plugin ${plugin.instance?.pluginName} (${fnName}):`,
+                        `[Ryelite] Error in plugin ${plugin.instance?.pluginName} (${fnName}):`,
                         error
                     );
                 }

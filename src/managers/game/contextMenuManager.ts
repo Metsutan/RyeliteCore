@@ -536,7 +536,7 @@ export class ContextMenuManager {
 
         if (!classObject) {
             console.warn(
-                `[Highlite] Attempted to register unknown static client class hook (${sourceClass}).`
+                `[Ryelite] Attempted to register unknown static client class hook (${sourceClass}).`
             );
             return false;
         }

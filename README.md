@@ -5,17 +5,17 @@ This project/package provides two things in one. A plugin-type api to use during
 ## Installation
 
 ```bash
-npm install @highlite/core
+npm install @ryelite/core
 -or-
-yarn add @highlite/core
+yarn add @ryelite/core
 ```
 
 ## Usage
 
-This package provides TypeScript type definitions for developing Highlite plugins. Import the types you need:
+This package provides TypeScript type definitions for developing Ryelite plugins. Import the types you need:
 
 ```typescript
-import { Plugin, IHighlite, PluginSettings } from '@highlite/core';
+import { Plugin, IHighlite, PluginSettings } from '@ryelite/core';
 
 export class MyPlugin extends Plugin {
     pluginName = 'MyAwesomePlugin';
@@ -46,7 +46,7 @@ export class MyPlugin extends Plugin {
 
 - `NotificationManager` - In-game notifications
 - `ItemTooltip` - Generic Tooltip Manager
-- `UIManager` - Highlite Centric way of creating on-screen UI Elements
+- `UIManager` - Ryelite Centric way of creating on-screen UI Elements
 - `PanelManager` - UI panel management
 - `SettingsManager` - Plugin settings management
 - `DatabaseManager` - Data persistence
