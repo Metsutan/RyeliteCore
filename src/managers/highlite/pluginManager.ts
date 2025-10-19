@@ -24,8 +24,8 @@ import { DatabaseManager } from './databaseManager';
 import { SettingsManager } from './settingsManager';
 
 // Highlite mirror endpoints
-const HIGHLITE_MANIFEST_URL = 'https://www.highlite.dev/api/plugins/manifest.json';
-const HIGHLITE_MIRROR_BASE = 'https://www.highlite.dev/api/plugins';
+const HIGHLITE_MANIFEST_URL = 'https://www.ryelite.org/api/plugins/manifest.json';
+const HIGHLITE_MIRROR_BASE = 'https://www.ryelite.org/api/plugins';
 
 export interface ManagedPlugin {
     config: PluginConfig | undefined;
