@@ -151,6 +151,10 @@ export class SettingsManager {
         // TODO: This may need to be placed in a more explicit step.
         this.databaseSettings = await this.database.get('settings', this.username);
 
+        this.pluginList.sort((a, b) => 
+            a.pluginName.localeCompare(b.pluginName, undefined, { sensitivity: 'base' })
+        );
+
         if (this.databaseSettings) {
             // We have settings for the user, so load them into each plugin
             for (const plugin in this.databaseSettings) {
